@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Expo / build output
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+android/
+ios/
+
+# Secrets (API key)
+.env
+.env*.local
+
+# Test coverage
+coverage/
+
+# Course material (not ours to publish)
+Lab-B2-Weather.pdf
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
