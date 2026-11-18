@@ -25,28 +25,65 @@ function Parse_Place(item: unknown, index: number): Place {
   return { name: Format_PlaceName(place.display_name), latitude, longitude };
 }
 
-// display_name is long: "Reykjavíkurborg, Höfuðborgarsvæðið, Ísland".
-// We keep the first part (the place) and the last part (the country): "Reykjavíkurborg, Ísland".
-// The country tells apart places with the same name (Paris, France vs Paris, Texas).
+// display_name is long: "Birmingham, Oakland County, Michigan, United States".
+// We keep the place, the region and the country: "Birmingham, Michigan, United States".
+// The country alone isn't enough: there are five Birminghams in the United States.
 function Format_PlaceName(displayName: string): string {
   const parts = displayName.split(',').map((part) => part.trim());
-  if (parts.length === 1) return parts[0];
-  return `${parts[0]}, ${parts[parts.length - 1]}`;
+  if (parts.length <= 3) return parts.join(', ');
+  const [place, region, country] = [parts[0], parts[parts.length - 2], parts[parts.length - 1]];
+  return `${place}, ${region}, ${country}`;
 }
 
-// maps.co often returns the same city twice (once as a city, once as a boundary).
-// After shortening, those look identical in the list, so we keep only the first one.
+// maps.co often returns the same city twice (once as a city, once as its municipality, a few km apart).
+// Two results closer than ~10 km are the same city, so we keep only the first one.
+// (Not by name: "Birmingham, Alabama" and "Birmingham, Michigan" are different cities.)
 function Calc_RemoveDuplicates(places: Place[]): Place[] {
-  const seenNames = new Set<string>();
-  return places.filter((place) => {
-    if (seenNames.has(place.name)) return false;
-    seenNames.add(place.name);
-    return true;
-  });
+  const kept: Place[] = [];
+  for (const place of places) {
+    if (!kept.some((keptPlace) => isSameCity(keptPlace, place))) kept.push(place);
+  }
+  return kept;
+}
+
+// Closer than 0.1° in both latitude and longitude (0.1° latitude ≈ 11 km) counts as the same city.
+const SAME_CITY_DEGREES = 0.1;
+
+function isSameCity(a: Place, b: Place): boolean {
+  return Math.abs(a.latitude - b.latitude) < SAME_CITY_DEGREES &&
+    Math.abs(a.longitude - b.longitude) < SAME_CITY_DEGREES;
 }
 
 function parseError(fieldName: string): AppError {
   return new AppError('parse', `maps.co sent a missing or wrong "${fieldName}".`);
+}
+
+// ---- Calc_LocalMatches (W-21) ----
+// maps.co only matches WHOLE words ("Reykjav" finds nothing), so while typing we first look in our own city list.
+// A city matches if its name STARTS with what was typed, ignoring case and accents:
+// "reykjav", "Malmo" and "hafnarfjordur" all match.
+export function Calc_LocalMatches(query: string, cities: Place[]): Place[] {
+  const typed = toSearchKey(query.trim());
+  if (typed === '') return [];
+  return cities.filter((city) => toSearchKey(city.name).startsWith(typed));
+}
+
+// Lowercase and swap Nordic letters for plain ones, so people can type without special keys.
+const LETTER_SWAPS: Record<string, string> = {
+  á: 'a', à: 'a', ä: 'a', å: 'a', æ: 'ae', é: 'e', è: 'e', í: 'i', ó: 'o', ö: 'o', ø: 'o',
+  ú: 'u', ü: 'u', ý: 'y', ð: 'd', þ: 'th',
+};
+
+function toSearchKey(text: string): string {
+  return Array.from(text.toLowerCase(), (letter) => LETTER_SWAPS[letter] ?? letter).join('');
+}
+
+// ---- Calc_MergeSuggestions (W-21) ----
+// Our own matches first (instant, the Nordic cities we care about), then maps.co's results.
+// A maps.co place that is the same city as one of ours (same ~10 km rule as above) is left out.
+export function Calc_MergeSuggestions(local: Place[], remote: Place[]): Place[] {
+  const newRemote = remote.filter((place) => !local.some((city) => isSameCity(city, place)));
+  return [...local, ...newRemote];
 }
 
 // ---- Validate_Coordinates (W-13) ----

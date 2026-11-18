@@ -7,6 +7,13 @@ Short stories and "why" answers worth telling at the oral exam. Add one line whe
 |---|---|---|
 | 2026-11-18 | `Calc_DaylightChange` | A 10-second loss rounded to `-0` in JavaScript, so the screen would show "−0 min". A test caught it. Fix: `minutes === 0 ? 0 : minutes`. |
 
+## Things we found by testing against the real API
+| Date | Found | What we did |
+|---|---|---|
+| 2026-11-18 | "Birmingham" returns 6 places, but we only showed 2. We shortened names to "place, country", so all 5 US ones became "Birmingham, United States" and the duplicate filter removed 4. | Names now keep the region. Duplicates are found by distance (< ~10 km), not by name. Saved the real response as a test (`mapsco-birmingham.json`). |
+| 2026-11-18 | Pausing mid-word ("Birming") showed "No place found", even though the place exists. | "No place found" now only shows after Enter. |
+| 2026-11-18 | maps.co only matches whole words: "Reykjav" finds nothing, and "Stockh" finds a street in Germany. Suggestions after 2 letters (W-21) can't come from maps.co alone. | We mix them: our own cities that start with the typed letters show at once, and maps.co's results are added after the pause. |
+
 ## Mutation tests (broke the code on purpose, a test failed)
 | Function | What we broke | Tests that failed |
 |---|---|---|
@@ -18,6 +25,10 @@ Short stories and "why" answers worth telling at the oral exam. Add one line whe
 | `Calc_DaylightChange` | swapped today and yesterday | 4 |
 | `Validate_Coordinates` | latitude limit 900 instead of 90 | 1 |
 | `Parse_Places` | removed the duplicate filter | 1 |
+| `Format_ErrorMessage` | checked for 430 instead of 429 | 1 |
+| `Calc_LocalMatches` | `includes` instead of `startsWith` | 2 |
+| `Calc_LocalMatches` | removed the ð → d swap | 1 |
+| `Parse_Places` | duplicates by name again (the old bug) | 2 |
 
 ## Good "why" answers
 - **Why `unknown` for API JSON?** TypeScript won't let us read a field until we've checked it, so bad data can't sneak past the parser.
@@ -25,5 +36,11 @@ Short stories and "why" answers worth telling at the oral exam. Add one line whe
 - **Why gusts, not average wind?** A gust is what knocks you over or breaks your umbrella.
 - **Why do helpers return levels/objects, not text?** The screen decides the wording. The helpers stay pure and easy to test (W-18).
 - **Why a pattern in `Validate_Coordinates`, not just `Number()`?** `Number('')` is 0 and `Number('1e2')` is 100, so empty or odd text would slip through.
-- **Why is "no places found" not an error in `Parse_Places`?** An empty list is a valid answer. The ViewModel decides to show "not found".
+- **Why is "no places found" not an error in `Parse_Places`?** An empty list is a valid answer. The ViewModel decides to show "not found", and only after Enter, because while typing a half word finds nothing.
+- **Why did unit tests miss the Birmingham bug?** The saved response only had one Reykjavík, so no test had two places with the same name. Testing against the real API found it, and now it's a saved test case.
+- **How do two fast searches never show the wrong city? (W-20)** Each new search cancels the old request (AbortController) and gets a number. When an answer arrives, it's only used if its number is still the newest. Cancelling alone isn't enough, because an answer may already have arrived just before we cancelled.
+- **What happens offline? (W-09)** The fetch fails as `network`, and the ViewModel loads the cache. If the cache is for the same place, it shows it with "No internet connection" + "last updated". Otherwise it shows the error state.
+- **Why does the screen never call a helper?** The ViewModel (main process) calls the helpers in order and hands the screen finished values. The screen only displays them.
+- **Can the user type coordinates? (W-01, W-13)** Yes. Home search takes a place name OR latitude + longitude. `Validate_Coordinates` checks those two fields, and that's where "Latitude must be between -90 and 90" comes from. maps.co results never go through it.
+- **Why both a typing pause and a 1-second gap?** The pause (400 ms) waits for the user to stop typing. The gap respects maps.co's limit of about 1 request/second, so we don't get 429 errors.
 - **Why do tests use saved responses?** They're fast, they work offline and give the same result every time. Jest even fakes `fetch`.

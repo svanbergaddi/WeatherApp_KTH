@@ -10,7 +10,7 @@
 
 ## 2. Project
 React Native (Expo) + TypeScript · Open-Meteo + geocode.maps.co · Android Emulator · Target grade: A
-Team: _[name]_, _[name]_ · Presentation: _[date]_
+Solo project: _[name]_ · Presentation: _[date]_
 
 ## 3. Requirements
 | ID | Requirement | Done |
@@ -69,6 +69,13 @@ Write one before coding each part.
 - Tests: valid response, missing field
 - Reqs: W-05, W-11
 
+### `useForecastViewModel` (`src/Forecast/ForecastViewModel.ts`)
+- Does: main process for the forecast. On start it shows the cached forecast, then refreshes it. `Process_LoadForecast(place)` runs fetch → parse → show → save the cache. It hands the screen ready-made values (wind warning, outfit, daylight change, today's hours, 7 days).
+- In / out: a `Place` → state `{ status, place, forecast, view, message, savedAt }`
+- Edge cases: offline (show the cache + a message), a new place picked while loading (cancel the old request, ignore old answers), no cache + error (error state, never the wrong city)
+- Tests: `Format_ErrorMessage` with Jest. The hook by hand on the phone (see docs/TEST_REPORT.md).
+- Reqs: W-01, W-09, W-14, W-15, W-20
+
 ## 5. Decisions
 | Date | Decision | Why |
 |---|---|---|
@@ -86,13 +93,20 @@ Write one before coding each part.
 | 2026-11-18 | Group hours by the first 10 characters of the time, not `new Date()` | Times are already the city's local time. `new Date()` would move them into the phone's time zone. |
 | 2026-11-18 | Wind warning uses gusts: strong ≥ 14 m/s, storm ≥ 21 m/s | Beaufort 7 and 9. Gusts are what knock you over, not the average wind. |
 | 2026-11-18 | What to wear uses feels-like (≥18 t-shirt, ≥10 light jacket, ≥0 jacket, else winter jacket; hat <5, gloves <0; rain ≥0.5 mm) | Feels-like already includes wind chill. Umbrella → rain jacket when gusts are strong, because umbrellas break. |
-| 2026-11-18 | Place name = first + last part of display_name ("Reykjavíkurborg, Ísland"); duplicates removed | Short, but the country tells apart same-name places |
+| 2026-11-18 | Place name = place + region + country ("Birmingham, Michigan, United States"); duplicates = closer than ~10 km, not same name | Changed after testing "Birmingham": with only the country, 4 of 5 US Birminghams were hidden as "duplicates" |
+| 2026-11-18 | "No place found" only after Enter, not while typing | A half word ("Birming") finds nothing on maps.co, but the place exists |
 | 2026-11-18 | Coordinates: two separate fields, comma accepted as decimal point, checked with a pattern | Nordic users type "59,33". `Number('')` is 0, so `Number()` alone isn't enough. |
+| 2026-11-18 | Race guard = cancel the old request + a request number | Cancelling stops the download. The number ignores an answer that already arrived. |
+| 2026-11-18 | On error, show the cache only if it's for the same place, else an error state | Old data for the right city is fine (W-09). Data for the wrong city never is (W-20). |
+| 2026-11-18 | ViewModels are React hooks (`useForecastViewModel`) | The screen just calls the hook. State lives in one place. |
+| 2026-11-18 | Search waits 400 ms after typing, and at least 1 s between maps.co calls | W-21 typing pause + maps.co's limit of about 1 request/second (avoids 429) |
+| 2026-11-18 | Keep coordinate input, but small (behind "Use coordinates instead") | The PDF asks for it (home screen, "city name or coordinates", "only valid floating-point values"). City search stays the main feature. |
+| 2026-11-18 | Suggestions = our own cities that start with the typed letters (instant, accents ignored) + maps.co results, same city within ~10 km shown once | maps.co only matches whole words. This way "Ha" finds Hafnarfjörður at once, and any other city still works. |
 | 2026-11-18 | Tests use saved real responses (`__tests__/fixtures/`), never the network | Tests are fast and give the same result every time |
 
 ## 6. End-of-session ritual
 1. Update the log below.
-2. Tick requirements we can both explain.
+2. Tick requirements I can explain.
 3. Add new decisions to Section 5.
 4. Fill in the oral exam map.
 5. Write in docs/LLM_PROCESS.md and docs/REFLECTION.md.
@@ -103,7 +117,7 @@ Write one before coding each part.
 | 1 API request | `API_GetForecast` (Forecast/ForecastService.ts) → `API_FetchJson` (Shared/HttpClient.ts) | |
 | 2 Parsing | `Parse_Forecast` (Forecast/ForecastHelpers.ts) | `__tests__/ForecastHelpers.test.ts` (12 tests) |
 | 5 Search → screen | | |
-| 12 Race condition | | |
+| 12 Race condition | `Process_LoadForecast` (Forecast/ForecastViewModel.ts): `controllerRef` + `requestIdRef` | by hand: tap Reykjavík, then Stockholm fast |
 | 26 This file → code | | |
 _(add the rest as we go)_
 
@@ -115,6 +129,10 @@ _(add the rest as we go)_
 | `Calc_GroupByDay` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
 | `Calc_WindWarning` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
 | `Calc_WhatToWear` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
+| `useForecastViewModel`, `Format_ErrorMessage`, temporary test buttons on the home screen | Claude | Support code, step 3 |
+| `useSearchViewModel`, quick-pick list, search controls on the test screen | Claude | Support code, step 3 |
+| `Calc_LocalMatches`, `Calc_MergeSuggestions` (Core) + their tests | Claude | We chose the design. 2 mutations checked (caught). |
+| `Format_ErrorMessage` tests | Claude | We asked for them. 1 mutation checked (caught). |
 | `Parse_Places`, `Validate_Coordinates` (Core) + their tests | Claude | We asked for them. 2 mutations checked (caught). |
 | `Calc_DaylightChange` (Core) + its tests | Claude | We asked for it. A test found a real bug (−0); fixed. 1 mutation checked (caught). |
 | `Parse_Forecast` tests | Claude | We asked for them. 2 mutations checked (both caught). |

@@ -1,0 +1,128 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Calc_DaylightChange, Calc_GroupByDay, Calc_WhatToWear, Calc_WindWarning, Parse_Forecast,
+} from '@/Forecast/ForecastHelpers';
+import { API_GetForecast, Storage_LoadForecast, Storage_SaveForecast } from '@/Forecast/ForecastService';
+import { Format_ErrorMessage } from '@/Shared/FormatHelpers';
+import { AppError, DailySummary, Forecast, HourlyPoint, Outfit, Place, WindWarning } from '@/Shared/Types';
+
+// Everything the screens show, already calculated. The screens only display these values.
+export type ForecastView = {
+  today: DailySummary;
+  week: DailySummary[]; // today + the next 6 days (W-06)
+  todayHours: HourlyPoint[]; // hourly for today (W-07)
+  windWarningNow: WindWarning; // W-23
+  outfitToday: Outfit; // W-24
+  daylightChangeMinutes: number; // W-26
+};
+
+type ForecastState = {
+  status: 'empty' | 'loading' | 'ready' | 'error';
+  place: Place | null;
+  forecast: Forecast | null;
+  message: string | null; // error or offline note, shown above the data
+  savedAt: string | null; // set when we show cached data: "last updated …" (W-09)
+};
+
+const EMPTY_STATE: ForecastState = { status: 'empty', place: null, forecast: null, message: null, savedAt: null };
+
+// ---- Main process for the forecast ----
+// A React hook: the screen calls useForecastViewModel() and gets the state + the Process_ functions.
+export function useForecastViewModel() {
+  const [state, setState] = useState<ForecastState>(EMPTY_STATE);
+
+  // W-20 race guard, two parts:
+  // 1. controllerRef cancels the old network request when a new place is picked.
+  // 2. requestIdRef numbers every request. When an answer arrives, we only use it if it's still the newest.
+  //    (Cancelling alone isn't enough: an answer may already have arrived just before we cancelled.)
+  const controllerRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
+
+  // ---- Process_LoadForecast: fetch → parse → show → save the cache ----
+  async function Process_LoadForecast(place: Place): Promise<void> {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    const requestId = ++requestIdRef.current;
+
+    // Show "loading". Keep the old forecast only if it's for the same place, so we never show the wrong city.
+    setState((previous) => ({
+      status: 'loading',
+      place,
+      forecast: isSamePlace(previous.place, place) ? previous.forecast : null,
+      message: null,
+      savedAt: isSamePlace(previous.place, place) ? previous.savedAt : null,
+    }));
+
+    try {
+      const json = await API_GetForecast(place.latitude, place.longitude, controller.signal);
+      const forecast = Parse_Forecast(json);
+      if (requestId !== requestIdRef.current) return; // a newer request took over
+
+      setState({ status: 'ready', place, forecast, message: null, savedAt: null });
+      await Storage_SaveForecast(place, forecast);
+    } catch (error) {
+      if (error instanceof AppError && error.kind === 'cancelled') return; // we cancelled it ourselves
+      if (requestId !== requestIdRef.current) return;
+
+      // Offline or server error: fall back to the cache if it's for this place (W-09). Never crash (W-15).
+      const cached = await Storage_LoadForecast();
+      if (requestId !== requestIdRef.current) return;
+
+      const message = Format_ErrorMessage(error);
+      if (cached !== null && isSamePlace(cached.place, place)) {
+        setState({ status: 'ready', place, forecast: cached.forecast, message, savedAt: cached.savedAt });
+      } else {
+        setState({ status: 'error', place, forecast: null, message, savedAt: null });
+      }
+    }
+  }
+
+  // ---- Process_Refresh: load the same place again (pull to refresh, refresh timer) ----
+  function Process_Refresh(): void {
+    if (state.place !== null) Process_LoadForecast(state.place);
+  }
+
+  // ---- Process_Start: on app start, show the cache at once, then refresh it ----
+  useEffect(() => {
+    async function Process_Start(): Promise<void> {
+      const cached = await Storage_LoadForecast();
+      // If the user already picked a place while we were reading the cache, don't overwrite it.
+      if (cached === null || requestIdRef.current !== 0) return;
+
+      setState({ status: 'ready', place: cached.place, forecast: cached.forecast, message: null, savedAt: cached.savedAt });
+      Process_LoadForecast(cached.place);
+    }
+    Process_Start();
+
+    // When the screen closes, cancel any request still running.
+    return () => controllerRef.current?.abort();
+  }, []); // [] = run once, when the screen opens
+
+  // Recalculate the screen values only when the forecast changes.
+  const view = useMemo(() => (state.forecast === null ? null : Process_BuildView(state.forecast)), [state.forecast]);
+
+  return { ...state, view, Process_LoadForecast, Process_Refresh };
+}
+
+// ---- Process_BuildView: runs the helpers in order to get everything the screen shows ----
+// daily[0] is yesterday (past_days=1), so today is daily[1].
+function Process_BuildView(forecast: Forecast): ForecastView {
+  const yesterday = forecast.daily[0];
+  const today = forecast.daily[1];
+  const hoursByDay = Calc_GroupByDay(forecast.hourly);
+
+  return {
+    today,
+    week: forecast.daily.slice(1),
+    todayHours: hoursByDay[today.date] ?? [],
+    windWarningNow: Calc_WindWarning(forecast.current.windGustsMs),
+    outfitToday: Calc_WhatToWear(today.feelsLikeMinC, today.precipitationMm, today.windGustsMaxMs),
+    daylightChangeMinutes: Calc_DaylightChange(today.daylightSeconds, yesterday.daylightSeconds),
+  };
+}
+
+// Two places are the same if they have the same coordinates (names can differ: "Reykjavík" vs "Reykjavíkurborg").
+function isSamePlace(a: Place | null, b: Place): boolean {
+  return a !== null && a.latitude === b.latitude && a.longitude === b.longitude;
+}
