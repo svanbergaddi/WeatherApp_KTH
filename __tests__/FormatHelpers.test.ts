@@ -1,4 +1,7 @@
-import { Format_ErrorMessage } from '@/Shared/FormatHelpers';
+import {
+  Format_DayName, Format_DaylightChange, Format_ErrorMessage, Format_LastUpdated, Format_Outfit, Format_Temperature,
+  Format_Time, Format_Weather, Format_WindWarning,
+} from '@/Shared/FormatHelpers';
 import { AppError } from '@/Shared/Types';
 
 describe('Format_ErrorMessage', () => {
@@ -27,5 +30,89 @@ describe('Format_ErrorMessage', () => {
     expect(Format_ErrorMessage(new Error('boom'))).toBe('Something went wrong. Please try again.');
     expect(Format_ErrorMessage('just a string')).toBe('Something went wrong. Please try again.');
     expect(Format_ErrorMessage(undefined)).toBe('Something went wrong. Please try again.');
+  });
+});
+
+describe('Format_Temperature', () => {
+  test('rounds to whole degrees', () => {
+    expect(Format_Temperature(3.6)).toBe('4°');
+    expect(Format_Temperature(-5.6)).toBe('-6°');
+  });
+
+  test('a small minus rounds to 0°, not -0°', () => {
+    expect(Format_Temperature(-0.4)).toBe('0°');
+  });
+});
+
+describe('Format_Time', () => {
+  test('cuts the clock time out of a local date-time', () => {
+    expect(Format_Time('2026-11-18T14:00')).toBe('14:00');
+    expect(Format_Time('2026-11-17T10:03')).toBe('10:03');
+  });
+});
+
+describe('Format_DayName', () => {
+  test('today says "Today"', () => {
+    expect(Format_DayName('2026-11-18', '2026-11-18')).toBe('Today');
+  });
+
+  test('other days: short weekday + day of month', () => {
+    expect(Format_DayName('2026-11-19', '2026-11-18')).toBe('Thu 19');
+    expect(Format_DayName('2026-11-23', '2026-11-18')).toBe('Mon 23');
+    expect(Format_DayName('2026-12-01', '2026-11-18')).toBe('Tue 1');
+  });
+});
+
+describe('Format_Weather', () => {
+  test('known codes get an icon and words', () => {
+    expect(Format_Weather(3)).toEqual({ icon: '☁️', label: 'Overcast' });
+    expect(Format_Weather(73).label).toBe('Snow');
+  });
+
+  test('clear at night shows a moon, cloudy at night does not change', () => {
+    expect(Format_Weather(0, false)).toEqual({ icon: '🌙', label: 'Clear' });
+    expect(Format_Weather(3, false).icon).toBe('☁️');
+  });
+
+  test('an unknown code never crashes', () => {
+    expect(Format_Weather(42)).toEqual({ icon: '❔', label: 'Unknown' });
+  });
+});
+
+describe('Format_Outfit', () => {
+  test('cold: layer + hat + gloves', () => {
+    expect(Format_Outfit({ layer: 'winterJacket', hat: true, gloves: true, rainGear: 'none' })).toBe('Winter jacket + hat + gloves');
+  });
+
+  test('rain: umbrella, or a rain jacket when it is too windy', () => {
+    expect(Format_Outfit({ layer: 'tShirt', hat: false, gloves: false, rainGear: 'umbrella' })).toBe('T-shirt + umbrella');
+    expect(Format_Outfit({ layer: 'jacket', hat: false, gloves: false, rainGear: 'rainJacket' }))
+      .toBe('Jacket + rain jacket (too windy for an umbrella)');
+  });
+});
+
+describe('Format_WindWarning', () => {
+  test('no warning gives null (nothing is shown)', () => {
+    expect(Format_WindWarning('none', 8)).toBeNull();
+  });
+
+  test('strong and storm gusts', () => {
+    expect(Format_WindWarning('strong', 17.6)).toBe('Strong gusts up to 18 m/s');
+    expect(Format_WindWarning('storm', 25)).toBe('Storm gusts up to 25 m/s');
+  });
+});
+
+describe('Format_DaylightChange', () => {
+  test('more, less, or the same', () => {
+    expect(Format_DaylightChange(3)).toBe('3 min more daylight than yesterday');
+    expect(Format_DaylightChange(-6)).toBe('6 min less daylight than yesterday');
+    expect(Format_DaylightChange(0)).toBe('Same daylight as yesterday');
+  });
+});
+
+describe('Format_LastUpdated', () => {
+  test('shows the phone clock time with two digits', () => {
+    const fiveOverNine = new Date(2026, 10, 18, 9, 5).toISOString(); // 09:05 phone time
+    expect(Format_LastUpdated(fiveOverNine)).toBe('Last updated 09:05');
   });
 });

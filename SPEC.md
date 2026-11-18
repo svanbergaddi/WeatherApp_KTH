@@ -107,6 +107,15 @@ Write one before coding each part.
 | 2026-11-18 | Place names in English (maps.co `accept-language=en`) | The app is in English. Before, it mixed "Sverige" with "United States". |
 | 2026-11-18 | Country shown only for places abroad (phone's country from `reverseGeocodeAsync`); always shown if we don't know the phone's country | "Årsta, Stockholm" needs no ", Sweden". "Birmingham, Iowa" is clearer with ", United States". |
 | 2026-11-18 | Quick-pick cities store region + country and are named with the same rule as maps.co results; buttons still show the short name | Our cities hid maps.co's "Reykjavik, Iceland" as a duplicate and only had a bare name |
+| 2026-11-18 | Favourites and forecast are shared with React Context (one Provider each in `_layout.tsx`) | Several screens use them. With plain hooks, each screen would get its own copy and they'd drift apart. |
+| 2026-11-18 | Same favourite = closer than ~1 km | Quick pick and search give slightly different coordinates for one city, but Årsta and Östberga (2 km) are different places |
+| 2026-11-18 | Settings: refresh Never/15/30/60 min (default 30), theme Auto/Light/Night (default Auto). Shared Context, saved on the phone. | W-04 + W-29. Defaults make the app work before anything is chosen. |
+| 2026-11-18 | Saved settings are checked field by field (`Parse_Settings`); a broken or missing field gets its default | Storage only holds text. An old or broken save must never crash the app or wipe the other setting. |
+| 2026-11-18 | English only for now. Maybe later: a translations file + a language setting (Svenska, Íslenska) | Not a lab requirement. maps.co already takes a language, so place names would follow. |
+| 2026-11-18 | Compare: two slots, the left starts with the city shown on home (reused, no API call), differences are right − left | One fixed direction is easy to explain and test. Each side has its own race guard. |
+| 2026-11-18 | All colours in `Shared/Theme.ts` (light + Nordic night) via `useAppTheme()`. "Auto" = light until the Theme section adds sunset. | Switching theme only swaps the palette, the screens don't change |
+| 2026-11-18 | Weather icons are emoji from a WMO-code table (`Format_Weather`) | No icon library needed. The illustrated scenes come later with react-native-svg. |
+| 2026-11-18 | Home shows the hours LEFT today (from the current hour), 7 days, and the "now" card. Landscape = two columns. | W-07, W-10. Past hours aren't useful. |
 | 2026-11-18 | Tests use saved real responses (`__tests__/fixtures/`), never the network | Tests are fast and give the same result every time |
 
 ## 6. End-of-session ritual
@@ -136,6 +145,10 @@ _(add the rest as we go)_
 | `Calc_WhatToWear` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
 | `useForecastViewModel`, `Format_ErrorMessage`, temporary test buttons on the home screen | Claude | Support code, step 3 |
 | `useSearchViewModel`, quick-pick list, search controls on the test screen | Claude | Support code, step 3 |
+| Step 4 part 1: Theme.ts, Format_ helpers + tests, `Calc_HoursFromNow`, Card/StatusBanner/SearchBox, CurrentWeatherCard/HourlyStrip/DailyList, home screen, themed tabs | Claude | Boilerplate (UI) + Support. Format_ and Calc_ have tests. |
+| Compare (`Calc_CompareCities`, ViewModel, test screen) | Claude | Step 3. 2 mutations checked (caught). |
+| Settings (Service, `Parse_Settings`, shared ViewModel, auto-refresh timer, test screen) | Claude | Step 3. 1 mutation checked (caught). |
+| Favourites (Service, Helpers, shared ViewModel, test screens), forecast made shared | Claude | Step 3. 2 mutations checked (caught). |
 | English place names, country only abroad, re-saved maps.co test responses in English | Claude | Our idea. 1 mutation checked (caught). |
 | expo-location, `Device_GetLocation`, `Calc_SortByDistance` + `Calc_DistanceKm` (Core) + their tests | Claude | Our idea: closest result first. 1 mutation checked (caught). |
 | `Calc_LocalMatches`, `Calc_MergeSuggestions` (Core) + their tests | Claude | We chose the design. 2 mutations checked (caught). |
@@ -151,3 +164,4 @@ _(add the rest as we go)_
 | 2026-11-16 | Plan + context files | Set up the Expo project |
 | 2026-11-17 | Expo project, routes, placeholder screens, Jest | Data layer |
 | 2026-11-18 | Data layer + saved API responses, checked in Postman, `.env` key. All Core helpers (Forecast + Search) with 42 tests. docs/EXAM_NOTES.md. | Step 3: ViewModels, starting with `ForecastViewModel` |
+| 2026-11-18 | Step 3: ViewModels for Forecast, Search, Favourites, Settings, Compare (shared ones via Context). Search: own cities + maps.co, short names, closest first, English. expo-location. 88 tests. | Try everything on the phone. Then the Theme section or step 4 (UI). |

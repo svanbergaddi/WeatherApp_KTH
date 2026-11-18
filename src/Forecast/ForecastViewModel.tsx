@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Calc_DaylightChange, Calc_GroupByDay, Calc_WhatToWear, Calc_WindWarning, Parse_Forecast,
+  Calc_DaylightChange, Calc_GroupByDay, Calc_HoursFromNow, Calc_WhatToWear, Calc_WindWarning, Parse_Forecast,
 } from '@/Forecast/ForecastHelpers';
 import { API_GetForecast, Storage_LoadForecast, Storage_SaveForecast } from '@/Forecast/ForecastService';
+import { useSettingsViewModel } from '@/Settings/SettingsViewModel';
 import { Format_ErrorMessage } from '@/Shared/FormatHelpers';
 import { AppError, DailySummary, Forecast, HourlyPoint, Outfit, Place, WindWarning } from '@/Shared/Types';
 
@@ -10,7 +11,8 @@ import { AppError, DailySummary, Forecast, HourlyPoint, Outfit, Place, WindWarni
 export type ForecastView = {
   today: DailySummary;
   week: DailySummary[]; // today + the next 6 days (W-06)
-  todayHours: HourlyPoint[]; // hourly for today (W-07)
+  todayHours: HourlyPoint[]; // all 24 hours of today
+  hoursLeftToday: HourlyPoint[]; // from the current hour on: what the home screen shows (W-07)
   windWarningNow: WindWarning; // W-23
   outfitToday: Outfit; // W-24
   daylightChangeMinutes: number; // W-26
@@ -26,9 +28,28 @@ type ForecastState = {
 
 const EMPTY_STATE: ForecastState = { status: 'empty', place: null, forecast: null, message: null, savedAt: null };
 
+// ---- Why a Context? ----
+// The forecast is used on several screens: home shows it, the Favourites tab loads a place into it,
+// and the day detail screen (W-02) shows one of its days. A Context keeps ONE forecast for the whole app
+// (same pattern as FavouritesViewModel). ForecastProvider is in src/app/_layout.tsx.
+type ForecastViewModel = ReturnType<typeof useForecastState>;
+const ForecastContext = createContext<ForecastViewModel | null>(null);
+
+export function ForecastProvider({ children }: { children: ReactNode }) {
+  const viewModel = useForecastState();
+  return <ForecastContext.Provider value={viewModel}>{children}</ForecastContext.Provider>;
+}
+
+// Screens call this to get the shared forecast + the Process_ functions.
+export function useForecastViewModel(): ForecastViewModel {
+  const viewModel = useContext(ForecastContext);
+  if (viewModel === null) throw new Error('useForecastViewModel must be used inside ForecastProvider');
+  return viewModel;
+}
+
 // ---- Main process for the forecast ----
-// A React hook: the screen calls useForecastViewModel() and gets the state + the Process_ functions.
-export function useForecastViewModel() {
+// The state and the Process_ functions. Only ForecastProvider calls this; screens use useForecastViewModel().
+function useForecastState() {
   const [state, setState] = useState<ForecastState>(EMPTY_STATE);
 
   // W-20 race guard, two parts:
@@ -97,7 +118,23 @@ export function useForecastViewModel() {
 
     // When the screen closes, cancel any request still running.
     return () => controllerRef.current?.abort();
-  }, []); // [] = run once, when the screen opens
+  }, []); // [] = run once, when the app opens
+
+  // ---- Process_AutoRefresh: reload the shown place every N minutes (W-04) ----
+  // The timer is set up again whenever the setting changes ([refreshMinutes] below), and the old one
+  // is stopped first (the "return" cleanup), so there's never more than one timer running.
+  // placeRef: the timer runs later, so it reads the CURRENT place from a ref, not the place at setup time.
+  const { refreshMinutes } = useSettingsViewModel().settings;
+  const placeRef = useRef<Place | null>(null);
+  placeRef.current = state.place;
+
+  useEffect(() => {
+    if (refreshMinutes === 0) return; // 0 = never
+    const timer = setInterval(() => {
+      if (placeRef.current !== null) Process_LoadForecast(placeRef.current);
+    }, refreshMinutes * 60 * 1000);
+    return () => clearInterval(timer);
+  }, [refreshMinutes]);
 
   // Recalculate the screen values only when the forecast changes.
   const view = useMemo(() => (state.forecast === null ? null : Process_BuildView(state.forecast)), [state.forecast]);
@@ -116,6 +153,7 @@ function Process_BuildView(forecast: Forecast): ForecastView {
     today,
     week: forecast.daily.slice(1),
     todayHours: hoursByDay[today.date] ?? [],
+    hoursLeftToday: Calc_HoursFromNow(hoursByDay[today.date] ?? [], forecast.current.time),
     windWarningNow: Calc_WindWarning(forecast.current.windGustsMs),
     outfitToday: Calc_WhatToWear(today.feelsLikeMinC, today.precipitationMm, today.windGustsMaxMs),
     daylightChangeMinutes: Calc_DaylightChange(today.daylightSeconds, yesterday.daylightSeconds),

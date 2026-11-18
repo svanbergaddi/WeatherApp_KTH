@@ -110,6 +110,15 @@ export function Calc_GroupByDay(hourly: HourlyPoint[]): Record<string, HourlyPoi
   return days;
 }
 
+// ---- Calc_HoursFromNow (W-07) ----
+// The hours that haven't passed yet: from the current hour onwards. At 08:15 that starts with 08:00.
+// Times are local text like "2026-11-18T08:00", so comparing them as text gives the right order
+// (the same trick as Calc_GroupByDay: no new Date(), no time zone problems).
+export function Calc_HoursFromNow(hours: HourlyPoint[], nowLocalTime: string): HourlyPoint[] {
+  const currentHour = `${nowLocalTime.slice(0, 13)}:00`; // "2026-11-18T08:15" → "2026-11-18T08:00"
+  return hours.filter((hour) => hour.time >= currentHour);
+}
+
 // ---- Calc_WindWarning (W-23) ----
 // Gusts, not the average wind, decide the warning: a gust is what knocks you over or takes your umbrella.
 // Limits from the Beaufort scale:

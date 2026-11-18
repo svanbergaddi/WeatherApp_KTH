@@ -1,4 +1,4 @@
-import { Calc_DaylightChange, Calc_GroupByDay, Calc_WhatToWear, Calc_WindWarning, Parse_Forecast } from '@/Forecast/ForecastHelpers';
+import { Calc_DaylightChange, Calc_GroupByDay, Calc_HoursFromNow, Calc_WhatToWear, Calc_WindWarning, Parse_Forecast } from '@/Forecast/ForecastHelpers';
 import { AppError, HourlyPoint } from '@/Shared/Types';
 import reykjavik from './fixtures/openmeteo-reykjavik.json';
 
@@ -234,5 +234,23 @@ describe('Calc_DaylightChange', () => {
   test('real response: Reykjavík lost about 6 minutes since yesterday', () => {
     const daily = Parse_Forecast(copyOfFixture()).daily;
     expect(Calc_DaylightChange(daily[1].daylightSeconds, daily[0].daylightSeconds)).toBe(-6);
+  });
+});
+
+describe('Calc_HoursFromNow', () => {
+  const day = Calc_GroupByDay(Parse_Forecast(copyOfFixture()).hourly)['2026-11-17'];
+
+  test('starts with the current hour (08:15 → from 08:00), and keeps the rest of the day', () => {
+    const left = Calc_HoursFromNow(day, '2026-11-17T08:15');
+    expect(left[0].time).toBe('2026-11-17T08:00');
+    expect(left).toHaveLength(16); // 08:00 … 23:00
+  });
+
+  test('exactly on the hour includes that hour', () => {
+    expect(Calc_HoursFromNow(day, '2026-11-17T23:00').map((h) => h.time)).toEqual(['2026-11-17T23:00']);
+  });
+
+  test('just after midnight: the whole day is left', () => {
+    expect(Calc_HoursFromNow(day, '2026-11-17T00:05')).toHaveLength(24);
   });
 });

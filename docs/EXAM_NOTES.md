@@ -37,6 +37,11 @@ Short stories and "why" answers worth telling at the oral exam. Add one line whe
 | `Calc_SortByDistance` | farthest first instead of closest | 1 |
 | `Format_PlaceName` | show the country at home instead of abroad | 5 |
 | `Calc_LocalMatches` | dropped the quick-pick region | 3 |
+| `Calc_IsSamePlace` | 10 km instead of 1 km | 2 |
+| `Calc_ToggleFavourite` | changed the old list (`push`) instead of making a new one | 2 |
+| `Parse_Settings` | trusted the saved refresh value without checking it | 2 |
+| `Calc_CompareCities` | let −0 through | 1 |
+| `Calc_CompareCities` | compared yesterday (`daily[0]`) instead of today | 2 |
 
 ## Good "why" answers
 - **Why `unknown` for API JSON?** TypeScript won't let us read a field until we've checked it, so bad data can't sneak past the parser.
@@ -47,6 +52,18 @@ Short stories and "why" answers worth telling at the oral exam. Add one line whe
 - **Why is "no places found" not an error in `Parse_Places`?** An empty list is a valid answer. The ViewModel decides to show "not found", and only after Enter, because while typing a half word finds nothing.
 - **How do you name search results?** As short as possible, then only as long as needed. Everyone starts with the place + its town ("Årsta, Stockholm"), or + the region if the place is the town ("Paris, Texas"). If two results still look the same, both get one more level (suburb, then region, then country). We read named address fields, never the long text, so postcodes never show.
 - **Why are same-name places within 10 km merged?** For a weather app they have the same forecast, and maps.co often returns one place twice (e.g. a locality and a road with the same name).
+- **Why a React Context for favourites and the forecast?** Several screens use them (home star, Favourites tab, day detail). A plain hook gives each screen its own copy, so starring on home wouldn't show in the tab. A Context holds ONE copy for the whole app (the Provider in `_layout.tsx`), and every screen reads the same one.
+- **Why does `Calc_ToggleFavourite` return a new list instead of changing the old one?** React compares the old and new list to decide whether to redraw. If we changed the same list, React would see "same list" and not update the screen.
+- **How does auto-refresh work? (W-04)** A `setInterval` in the forecast ViewModel reloads the shown place every N minutes. When the setting changes, React stops the old timer (the effect's cleanup) and starts a new one, so there's never more than one. The timer reads the place from a ref, so it always reloads the place shown NOW, not the one shown when the timer started.
+- **Why check saved settings with `Parse_Settings`?** The phone's storage only holds text, and it could be from an older app version or broken. Each field is checked on its own, so one bad field gets its default and never wipes the other.
+- **Why `<K extends keyof Settings>` in `Process_ChangeSetting`?** TypeScript then checks that the value fits the setting: `('refreshMinutes', 15)` is fine, `('refreshMinutes', 'night')` is an error before the app even runs.
+- **Why is Compare a plain hook, but Forecast/Favourites/Settings are Contexts?** Only the Compare screen uses its state. A Context is only needed when several screens must share ONE copy.
+- **How does Compare reuse search?** `useSearchViewModel` takes "what to do with a picked place" as a parameter. Home passes "load it on home", Compare passes "load it into the active side". Same search code, two uses.
+- **Why round the differences to one decimal?** Computers can't store most decimals exactly: 2.1 − 1.9 gives 0.20000000000000018. Rounding hides that, and −0 is turned into 0.
+- **How does the screen avoid a blank screen? (W-15, W-19)** Every forecast status has its own look: empty → a hint, first load → a spinner, error → a red banner with "Try again", offline with saved data → the data + an orange banner with "Last updated 14:05".
+- **Where do the colours come from?** Only `Shared/Theme.ts`. Screens call `useAppTheme()` and use `theme.text`, `theme.card`… Switching to Nordic night swaps the palette, and every screen follows without changing.
+- **Why `new Date()` in `Format_LastUpdated` but never for forecast times?** `savedAt` is a real moment (ISO, UTC), and we want the phone's clock time. Forecast times are already the city's local time as text, so converting them would shift them into the phone's time zone.
+- **How does landscape work? (W-10)** `useWindowDimensions()` gives width and height. When width > height, the "now" card and the lists go side by side (`flexDirection: 'row'`).
 - **When is the country shown?** Only for places outside the phone's country. The phone's country comes from `reverseGeocodeAsync` (the phone's own map service, no maps.co call). If we don't know it (no permission), the country is always shown, because we can't tell what "abroad" is.
 - **Why the haversine formula and not plain Pythagoras on lat/lon?** The Earth is round. This far north one degree of longitude is only ~55 km (Stockholm) but one degree of latitude is ~111 km, so a flat distance would sort wrongly.
 - **What if the user says no to location?** `Device_GetLocation` returns null, and the list keeps maps.co's order. Location is a bonus, never required.

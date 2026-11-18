@@ -1,85 +1,97 @@
-import { Link } from 'expo-router';
-import { useState } from 'react';
-import { Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useFavouritesViewModel } from '@/Favourites/FavouritesViewModel';
+import { CurrentWeatherCard } from '@/Forecast/Components/CurrentWeatherCard';
+import { DailyList } from '@/Forecast/Components/DailyList';
+import { HourlyStrip } from '@/Forecast/Components/HourlyStrip';
 import { useForecastViewModel } from '@/Forecast/ForecastViewModel';
-import { QUICK_PICK_CITIES } from '@/Search/QuickPickCities';
+import { SearchBox } from '@/Search/Components/SearchBox';
 import { useSearchViewModel } from '@/Search/SearchViewModel';
+import { StatusBanner } from '@/Shared/Components/StatusBanner';
+import { Format_LastUpdated } from '@/Shared/FormatHelpers';
+import { useAppTheme } from '@/Shared/Theme';
 
-// TEMPORARY test screen for step 3: plain controls that drive the two ViewModels.
-// Replaced by the real, designed home screen in step 4 (W-01, W-19, W-21, W-22).
+// ---- Home screen (W-01) ----
+// The View in MVVM: it only places things on screen. All state and decisions are in the ViewModels.
+// Every state has its own look (W-19): empty, loading, offline with saved data, error, ready.
 export function SearchScreen() {
+  const theme = useAppTheme();
   const forecast = useForecastViewModel();
-  // Picking a place in Search loads its forecast: the two ViewModels are connected here, in the screen.
+  const favourites = useFavouritesViewModel();
+  // Picking a place in Search loads its forecast: the two ViewModels are connected here.
   const search = useSearchViewModel(forecast.Process_LoadForecast);
-  const [latitudeText, setLatitudeText] = useState('');
-  const [longitudeText, setLongitudeText] = useState('');
-  const [showCoordinates, setShowCoordinates] = useState(false);
-  const { view } = forecast;
+
+  // Landscape (W-10): the screen is wider than tall, so put the "now" card and the lists side by side.
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+
+  const { place, view, status } = forecast;
+  const data = forecast.forecast;
+  const hasData = place !== null && data !== null && view !== null;
+  const isRefreshing = status === 'loading' && hasData; // reloading while old data is still shown
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.heading}>Search</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="City name"
-        value={search.query}
-        onChangeText={search.Process_TypeQuery}
-        onSubmitEditing={search.Process_SubmitQuery}
-        returnKeyType="search"
-        autoCorrect={false}
-      />
-      {search.isSearching && <Text>Searching…</Text>}
-      {search.message !== null && <Text>Search message: {search.message}</Text>}
-      {search.suggestions.map((place) => (
-        <Button key={`${place.latitude},${place.longitude}`} title={place.name} onPress={() => search.Process_SelectPlace(place)} />
-      ))}
+    <ScrollView
+      style={{ backgroundColor: theme.background }}
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+      // Pull down to refresh. The network call runs in the background, so the screen never freezes (W-14).
+      refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={forecast.Process_Refresh} tintColor={theme.accent} />}
+    >
+      <SearchBox search={search} />
 
-      <Text style={styles.heading}>Quick picks</Text>
-      <View style={styles.row}>
-        {QUICK_PICK_CITIES.map((place) => (
-          <Button key={place.name} title={place.name} onPress={() => search.Process_SelectPlace(place)} />
-        ))}
-      </View>
+      {/* Empty: first start, nothing picked yet. */}
+      {status === 'empty' && (
+        <Text style={[styles.hint, { color: theme.textMuted }]}>Search for a place, or pick one of the cities above.</Text>
+      )}
 
-      {/* Coordinates are hidden until asked for: city search is the main way in (W-13 still works). */}
-      <Text style={styles.link} onPress={() => setShowCoordinates(!showCoordinates)}>
-        {showCoordinates ? 'Hide coordinates' : 'Use coordinates instead'}
-      </Text>
-      {showCoordinates && (
-        <>
-          <View style={styles.row}>
-            <TextInput style={styles.input} placeholder="Latitude" value={latitudeText} onChangeText={setLatitudeText} />
-            <TextInput style={styles.input} placeholder="Longitude" value={longitudeText} onChangeText={setLongitudeText} />
+      {/* Loading for the first time: nothing to show yet. */}
+      {status === 'loading' && !hasData && (
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color={theme.accent} />
+          <Text style={{ color: theme.textMuted }}>Getting the weather for {place?.name}…</Text>
+        </View>
+      )}
+
+      {/* Error with nothing to show: say what happened and offer to try again. Never a blank screen (W-15). */}
+      {status === 'error' && forecast.message !== null && (
+        <StatusBanner tone="error" message={forecast.message} detail={place?.name}
+          actionLabel="Try again" onAction={forecast.Process_Refresh} />
+      )}
+
+      {/* Offline (or server trouble) but we have saved data: show it, and say how old it is (W-09). */}
+      {hasData && forecast.message !== null && (
+        <StatusBanner tone="warning" message={forecast.message}
+          detail={forecast.savedAt !== null ? `Showing saved data. ${Format_LastUpdated(forecast.savedAt)}` : undefined}
+          actionLabel="Try again" onAction={forecast.Process_Refresh} />
+      )}
+
+      {/* Checked again here (not with hasData) so TypeScript knows none of them is null inside. */}
+      {place !== null && data !== null && view !== null && (
+        <View style={isLandscape ? styles.columns : styles.stack}>
+          <View style={isLandscape ? styles.column : undefined}>
+            <CurrentWeatherCard
+              place={place}
+              forecast={data}
+              view={view}
+              isFavourite={favourites.Process_IsFavourite(place)}
+              onToggleFavourite={() => favourites.Process_ToggleFavourite(place)}
+            />
           </View>
-          <Button title="Go" onPress={() => search.Process_SearchCoordinates(latitudeText, longitudeText)} />
-        </>
+          <View style={[styles.stack, isLandscape && styles.column]}>
+            <HourlyStrip hours={view.hoursLeftToday} />
+            <DailyList days={view.week} todayDate={view.today.date} />
+          </View>
+        </View>
       )}
-
-      <Text style={styles.heading}>Forecast</Text>
-      <Button title="Refresh" onPress={forecast.Process_Refresh} />
-      <Text>Status: {forecast.status}</Text>
-      <Text>Place: {forecast.place?.name ?? '-'}</Text>
-      {forecast.message !== null && <Text>Message: {forecast.message}</Text>}
-      {forecast.savedAt !== null && <Text>Cached from: {forecast.savedAt}</Text>}
-      {view !== null && forecast.forecast !== null && (
-        <>
-          <Text>Now: {forecast.forecast.current.temperatureC} °C (feels {forecast.forecast.current.feelsLikeC} °C)</Text>
-          <Text>Gusts now: {forecast.forecast.current.windGustsMs} m/s → warning: {view.windWarningNow}</Text>
-          <Text>Wear today: {JSON.stringify(view.outfitToday)}</Text>
-          <Text>Daylight: {view.daylightChangeMinutes} min since yesterday</Text>
-          <Text>Days: {view.week.length} · Hours today: {view.todayHours.length}</Text>
-        </>
-      )}
-
-      <Link href="/day/2026-11-17">Open a test day →</Link>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, gap: 8 },
-  heading: { fontSize: 18, fontWeight: '600', marginTop: 12 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  link: { color: '#2a6fdb', marginTop: 12 },
-  input: { borderWidth: 1, borderColor: '#999', borderRadius: 6, padding: 8, minWidth: 140 },
+  container: { padding: 16, gap: 16, paddingBottom: 32 },
+  hint: { textAlign: 'center', marginTop: 24 },
+  loading: { alignItems: 'center', gap: 12, marginTop: 32 },
+  stack: { gap: 16 },
+  columns: { flexDirection: 'row', gap: 16, alignItems: 'flex-start' },
+  column: { flex: 1 },
 });

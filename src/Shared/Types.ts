@@ -62,6 +62,21 @@ export type Forecast = {
   daily: DailySummary[]; // daily[0] is yesterday, daily[1] is today
 };
 
+// The user's choices on the Settings screen, saved on the phone.
+export type Settings = {
+  refreshMinutes: 0 | 15 | 30 | 60; // W-04: how often the forecast updates by itself. 0 = never.
+  themeChoice: 'auto' | 'light' | 'night'; // W-29: auto = Nordic night after sunset (W-27)
+};
+
+// Two cities side by side (W-25). Every difference is RIGHT minus LEFT, so +3 means the right city has 3 more.
+export type CityComparison = {
+  temperatureDiffC: number; // now
+  feelsLikeDiffC: number; // now
+  gustsDiffMs: number; // now
+  rainTodayDiffMm: number; // today's total
+  daylightTodayDiffMinutes: number; // today
+};
+
 // How worried the user should be about the wind gusts (W-23). The screen turns it into text and colour.
 export type WindWarning = 'none' | 'strong' | 'storm';
 
