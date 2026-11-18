@@ -116,6 +116,8 @@ Write one before coding each part.
 | 2026-11-18 | All colours in `Shared/Theme.ts` (light + Nordic night) via `useAppTheme()`. "Auto" = light until the Theme section adds sunset. | Switching theme only swaps the palette, the screens don't change |
 | 2026-11-18 | Weather icons are emoji from a WMO-code table (`Format_Weather`) | No icon library needed. The illustrated scenes come later with react-native-svg. |
 | 2026-11-18 | Home shows the hours LEFT today (from the current hour), 7 days, and the "now" card. Landscape = two columns. | W-07, W-10. Past hours aren't useful. |
+| 2026-11-18 | Day detail reads the SHARED forecast (no new API call); a date not in the forecast shows a message + Back | Always matches the home screen. An old link never crashes. |
+| 2026-11-18 | Demos on eduroam: `npx expo start --tunnel` or the Android emulator | eduroam isolates devices, so the phone can't reach the laptop directly |
 | 2026-11-18 | Tests use saved real responses (`__tests__/fixtures/`), never the network | Tests are fast and give the same result every time |
 
 ## 6. End-of-session ritual
@@ -145,6 +147,7 @@ _(add the rest as we go)_
 | `Calc_WhatToWear` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
 | `useForecastViewModel`, `Format_ErrorMessage`, temporary test buttons on the home screen | Claude | Support code, step 3 |
 | `useSearchViewModel`, quick-pick list, search controls on the test screen | Claude | Support code, step 3 |
+| Step 4 part 2: day detail (`Process_GetDay`/`Process_BuildDayView` + tests, `Format_DaylightLength` + tests, DaySummaryCard, HourlyList) | Claude | UI + Support |
 | Step 4 part 1: Theme.ts, Format_ helpers + tests, `Calc_HoursFromNow`, Card/StatusBanner/SearchBox, CurrentWeatherCard/HourlyStrip/DailyList, home screen, themed tabs | Claude | Boilerplate (UI) + Support. Format_ and Calc_ have tests. |
 | Compare (`Calc_CompareCities`, ViewModel, test screen) | Claude | Step 3. 2 mutations checked (caught). |
 | Settings (Service, `Parse_Settings`, shared ViewModel, auto-refresh timer, test screen) | Claude | Step 3. 1 mutation checked (caught). |

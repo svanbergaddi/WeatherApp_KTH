@@ -1,5 +1,6 @@
 import {
-  Format_DayName, Format_DaylightChange, Format_ErrorMessage, Format_LastUpdated, Format_Outfit, Format_Temperature,
+  Format_DayName, Format_DaylightChange, Format_DaylightLength, Format_ErrorMessage, Format_LastUpdated, Format_Outfit,
+  Format_Temperature,
   Format_Time, Format_Weather, Format_WindWarning,
 } from '@/Shared/FormatHelpers';
 import { AppError } from '@/Shared/Types';
@@ -114,5 +115,17 @@ describe('Format_LastUpdated', () => {
   test('shows the phone clock time with two digits', () => {
     const fiveOverNine = new Date(2026, 10, 18, 9, 5).toISOString(); // 09:05 phone time
     expect(Format_LastUpdated(fiveOverNine)).toBe('Last updated 09:05');
+  });
+});
+
+describe('Format_DaylightLength', () => {
+  test('hours and minutes', () => {
+    expect(Format_DaylightLength(22_737)).toBe('6 h 19 min of daylight'); // Reykjavík, 17 Nov
+    expect(Format_DaylightLength(3_600)).toBe('1 h 0 min of daylight');
+  });
+
+  test('polar night and midnight sun get their own words', () => {
+    expect(Format_DaylightLength(0)).toBe('No sunrise today (polar night)');
+    expect(Format_DaylightLength(86_400)).toBe('The sun never sets today (midnight sun)');
   });
 });

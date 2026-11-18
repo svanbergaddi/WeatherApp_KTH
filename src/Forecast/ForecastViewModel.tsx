@@ -18,6 +18,17 @@ export type ForecastView = {
   daylightChangeMinutes: number; // W-26
 };
 
+// Everything the day detail screen shows for ONE day (W-02), already calculated.
+export type DayView = {
+  day: DailySummary;
+  isToday: boolean;
+  todayDate: string; // to name the day ("Today", "Thu 19")
+  hours: HourlyPoint[]; // that day hour by hour; for today only the hours left
+  windWarning: WindWarning; // from the day's strongest gust
+  outfit: Outfit;
+  daylightChangeMinutes: number; // compared with the day before
+};
+
 type ForecastState = {
   status: 'empty' | 'loading' | 'ready' | 'error';
   place: Place | null;
@@ -139,7 +150,35 @@ function useForecastState() {
   // Recalculate the screen values only when the forecast changes.
   const view = useMemo(() => (state.forecast === null ? null : Process_BuildView(state.forecast)), [state.forecast]);
 
-  return { ...state, view, Process_LoadForecast, Process_Refresh };
+  // ---- Process_GetDay: everything the day detail screen needs for one date (W-02) ----
+  // null if there's no forecast yet, or the date isn't in it (an old link, or the forecast moved on a day).
+  function Process_GetDay(date: string): DayView | null {
+    return state.forecast === null ? null : Process_BuildDayView(state.forecast, date);
+  }
+
+  return { ...state, view, Process_LoadForecast, Process_Refresh, Process_GetDay };
+}
+
+// ---- Process_BuildDayView: the same helpers as the home screen, for one chosen day ----
+export function Process_BuildDayView(forecast: Forecast, date: string): DayView | null {
+  const index = forecast.daily.findIndex((day) => day.date === date);
+  if (index === -1) return null;
+
+  const day = forecast.daily[index];
+  const dayBefore = forecast.daily[index - 1] ?? day; // daily[0] has no day before: then "no change"
+  const todayDate = forecast.daily[1].date;
+  const isToday = date === todayDate;
+  const allHours = Calc_GroupByDay(forecast.hourly)[date] ?? [];
+
+  return {
+    day,
+    isToday,
+    todayDate,
+    hours: isToday ? Calc_HoursFromNow(allHours, forecast.current.time) : allHours,
+    windWarning: Calc_WindWarning(day.windGustsMaxMs),
+    outfit: Calc_WhatToWear(day.feelsLikeMinC, day.precipitationMm, day.windGustsMaxMs),
+    daylightChangeMinutes: Calc_DaylightChange(day.daylightSeconds, dayBefore.daylightSeconds),
+  };
 }
 
 // ---- Process_BuildView: runs the helpers in order to get everything the screen shows ----

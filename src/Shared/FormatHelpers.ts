@@ -101,6 +101,15 @@ export function Format_DaylightChange(minutes: number): string {
   return `${Math.abs(minutes)} min ${word} daylight than yesterday`;
 }
 
+// ---- Format_DaylightLength: 22737 seconds → "6 h 19 min of daylight" (W-26) ----
+// Polar night (0 s) and midnight sun (86 400 s) get their own words: "0 h 0 min" would look like a bug.
+export function Format_DaylightLength(seconds: number): string {
+  if (seconds <= 0) return 'No sunrise today (polar night)';
+  if (seconds >= 86_400) return 'The sun never sets today (midnight sun)';
+  const totalMinutes = Math.round(seconds / 60);
+  return `${Math.floor(totalMinutes / 60)} h ${totalMinutes % 60} min of daylight`;
+}
+
 // ---- Format_LastUpdated: ISO time → "Last updated 14:05" (W-09) ----
 // savedAt is a real moment (ISO, UTC), so here new Date() is RIGHT: we want the phone's own clock time.
 export function Format_LastUpdated(savedAtIso: string): string {
