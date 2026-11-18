@@ -45,6 +45,10 @@ Team: _[name]_, _[name]_ · Presentation: _[date]_
 | W-24 | What to wear: one line from temp, wind and rain ("Jacket + hat, no umbrella") | ☐ |
 | W-25 | Compare two cities side by side | ☐ |
 | W-26 | Daylight: sunrise, sunset and minutes gained/lost since yesterday | ☐ |
+| W-27 | Auto theme: "Nordic night" from 30 min after sunset until sunrise, using the phone's location (falls back to the viewed city) | ☐ |
+| W-28 | Seasonal light themes (winter, spring, summer, autumn) chosen by date + hemisphere | ☐ |
+| W-29 | Settings: theme = Auto (default) / Always light / Always night | ☐ |
+| W-30 | Animated scene per theme (aurora, snow, birches, sea, leaves) + daylight arc. Animations stop when "reduce motion" is on. | ☐ |
 
 ## 4. Component specs
 Write one before coding each part.
@@ -71,6 +75,14 @@ Write one before coding each part.
 | 2026-11-16 | Expo + TypeScript | Used it in B:1, no Mac for iOS |
 | 2026-11-16 | Open-Meteo | Gives hourly + daily directly, no key |
 | 2026-11-17 | Quick-pick cities have hardcoded coordinates | No search call needed, so they're instant and save maps.co requests |
+| 2026-11-17 | Night theme uses phone location, falls back to viewed city | Feels right where you are, still works without permission |
+| 2026-11-17 | Night ends at sunrise | Simple rule, easy to explain and test |
+| 2026-11-17 | Sun times from Open-Meteo, not calculated ourselves | We already use the API. Solar maths would be a lot of code to defend. |
+| 2026-11-17 | react-native-svg for scenes, built-in `Animated` for motion | Expo's standard drawing library. No animation library needed. |
+| 2026-11-18 | Every failure becomes one `AppError` with a `kind` | Screens only handle one error type and pick a message from the kind |
+| 2026-11-18 | Ask Open-Meteo for `past_days=1` | Gives yesterday's daylight, so we can show minutes gained/lost (W-26) |
+| 2026-11-18 | maps.co key in `.env` (`EXPO_PUBLIC_`), not in the code | Keeps it off GitHub. It still ends up inside the app, which is OK for a free lab key. |
+| 2026-11-18 | Tests use saved real responses (`__tests__/fixtures/`), never the network | Tests are fast and give the same result every time |
 
 ## 6. End-of-session ritual
 1. Update the log below.
@@ -82,8 +94,8 @@ Write one before coding each part.
 ## 7. Oral exam map
 | Q | Where in the code | Test |
 |---|---|---|
-| 1 API request | | |
-| 2 Parsing | | |
+| 1 API request | `API_GetForecast` (Forecast/ForecastService.ts) → `API_FetchJson` (Shared/HttpClient.ts) | |
+| 2 Parsing | `Parse_Forecast` (Forecast/ForecastHelpers.ts), not written yet | fixture: openmeteo-reykjavik.json |
 | 5 Search → screen | | |
 | 12 Race condition | | |
 | 26 This file → code | | |
@@ -93,8 +105,11 @@ _(add the rest as we go)_
 | What | Tool | How |
 |---|---|---|
 | Plan + first drafts of these files | Claude | We edited them |
+| Expo setup + data layer (Types, HttpClient, Storage, Services) | Claude | Support code. We checked it in Postman. |
 
 ## 9. Session log
 | Date | What we did | Next |
 |---|---|---|
 | 2026-11-16 | Plan + context files | Set up the Expo project |
+| 2026-11-17 | Expo project, routes, placeholder screens, Jest | Data layer |
+| 2026-11-18 | Data layer + saved API responses, checked in Postman, `.env` key | Write `Parse_Forecast` + its tests |

@@ -10,4 +10,9 @@ You are a tutor, not the author. We must be able to explain every line at the or
 - English only.
 - At the end, remind us of the ritual in SPEC.md.
 
-Commands: `npx expo start` (press `a` for Android) · `npm test`
+## Expo (SDK 58)
+- Expo changes every release. Check the docs for our version (https://docs.expo.dev/versions/v58.0.0/) instead of relying on memory.
+- Install packages with `npx expo install <pkg>`, not `npm install`.
+- Routes live in `src/app/`. Those files only point to a screen in the section folders.
+
+Commands: `npx expo start` (press `a` for Android) · `npm test` · `npm run typecheck` · `npx expo-doctor`

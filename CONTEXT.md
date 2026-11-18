@@ -6,7 +6,7 @@
 - Test on the Android Emulator. A browser preview doesn't count.
 
 ## Libraries
-Only Expo, expo-router, AsyncStorage, NetInfo and Jest. Ask before adding anything else.
+Only Expo, expo-router, AsyncStorage, NetInfo, expo-location (for the night theme), react-native-svg (for scenes and the daylight arc) and Jest. Animations use React Native's built-in `Animated`. Ask before adding anything else.
 
 ## APIs
 - **Forecast:** `https://api.open-meteo.com/v1/forecast?latitude=..&longitude=..&hourly=..&daily=..&timezone=auto`

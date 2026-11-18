@@ -23,3 +23,16 @@ Lab-B2-Weather.pdf
 .DS_Store
 Thumbs.db
 *.log
+
+# From the Expo template
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+.metro-health-check*
+npm-debug.*
+*.tsbuildinfo

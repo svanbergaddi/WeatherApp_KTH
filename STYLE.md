@@ -20,7 +20,7 @@ Each section has the same four layers:
 | `XService.ts` | Functions | Talks to the API or storage |
 | `XHelpers.ts` | Helpers | Small pure functions with no fetch and no state. Easy to test. |
 
-Sections: `Search`, `Forecast`, `Compare`, `Favourites`, `Settings`, plus `Shared` (HttpClient, Storage, Theme, Types).
+Sections: `Search`, `Forecast`, `Compare`, `Favourites`, `Settings`, `Theme`, plus `Shared` (HttpClient, Storage, Theme, Types).
 
 ## Naming
 - **UpperCamelCase** for files, components, types and folders: `ForecastHelpers.ts`, `DayRow`, `Forecast`.
@@ -34,6 +34,7 @@ Sections: `Search`, `Forecast`, `Compare`, `Favourites`, `Settings`, plus `Share
 | `Validate_` | Checks user input | `Validate_Coordinates` |
 | `Format_` | Model → text on screen | `Format_Temperature`, `Format_Time` |
 | `Storage_` | Saves/loads on the phone | `Storage_SaveForecast`, `Storage_LoadFavourites` |
+| `Device_` | Asks the phone for something | `Device_GetLocation`, `Device_IsOnline` |
 | `Process_` | Main process in a ViewModel: runs the steps in order | `Process_SearchCity`, `Process_RefreshForecast` |
 
   This is a guideline, not a law. Exceptions: React hooks must start with lowercase `use…` (`useForecastViewModel`), and small inline functions don't need a prefix.
