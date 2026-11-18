@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ForecastView } from '@/Forecast/ForecastViewModel';
 import { Card } from '@/Shared/Components/Card';
+import { DaylightArc } from '@/Forecast/Components/DaylightArc';
 import {
-  Format_DaylightChange, Format_Outfit, Format_Temperature, Format_Time, Format_Weather, Format_WindWarning,
+  Format_DaylightChange, Format_Outfit, Format_Temperature, Format_Weather, Format_WindWarning,
 } from '@/Shared/FormatHelpers';
 import { useAppTheme } from '@/Shared/Theme';
 import { Forecast, Place } from '@/Shared/Types';
@@ -55,9 +56,7 @@ export function CurrentWeatherCard({ place, forecast, view, isFavourite, onToggl
 
       <Text style={{ color: theme.text }}>🧥 {Format_Outfit(view.outfitToday)}</Text>
 
-      <Text style={{ color: theme.textMuted }}>
-        🌅 {Format_Time(view.today.sunrise)}  ·  🌇 {Format_Time(view.today.sunset)}
-      </Text>
+      <DaylightArc sunrise={view.today.sunrise} sunset={view.today.sunset} progress={view.sunProgress} />
       <Text style={{ color: theme.textMuted }}>{Format_DaylightChange(view.daylightChangeMinutes)}</Text>
     </Card>
   );

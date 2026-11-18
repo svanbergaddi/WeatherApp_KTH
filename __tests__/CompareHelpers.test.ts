@@ -1,4 +1,4 @@
-import { Calc_CompareCities } from '@/Compare/CompareHelpers';
+import { Calc_CompareCities, Format_ComparisonSentences } from '@/Compare/CompareHelpers';
 import { Parse_Forecast } from '@/Forecast/ForecastHelpers';
 import { Forecast } from '@/Shared/Types';
 import reykjavikJson from './fixtures/openmeteo-reykjavik.json';
@@ -55,5 +55,31 @@ describe('Calc_CompareCities', () => {
     const copy = cityLike({});
     copy.daily[0].precipitationMm = 99; // yesterday's rain must not count
     expect(Calc_CompareCities(reykjavik, copy).rainTodayDiffMm).toBe(0);
+  });
+});
+
+describe('Format_ComparisonSentences', () => {
+  const same = { temperatureDiffC: 0, feelsLikeDiffC: 0, gustsDiffMs: 0, rainTodayDiffMm: 0, daylightTodayDiffMinutes: 0 };
+
+  test('right warmer, left windier, right lighter (signs are right − left)', () => {
+    const diff = { ...same, temperatureDiffC: 4.2, gustsDiffMs: -8.8, daylightTodayDiffMinutes: 60 };
+    expect(Format_ComparisonSentences('Reykjavík, Iceland', 'Stockholm, Stockholm County', diff)).toEqual([
+      'Stockholm is 4° warmer than Reykjavík',
+      'Reykjavík is windier: gusts 9 m/s stronger',
+      'Stockholm gets 60 min more daylight today',
+    ]);
+  });
+
+  test('small differences say "about the same"', () => {
+    const diff = { ...same, temperatureDiffC: -0.6, gustsDiffMs: 1.5 };
+    expect(Format_ComparisonSentences('A', 'B', diff)).toEqual([
+      'About the same temperature',
+      'About as windy',
+      'Same amount of daylight today',
+    ]);
+  });
+
+  test('left warmer', () => {
+    expect(Format_ComparisonSentences('Malmö', 'Akureyri', { ...same, temperatureDiffC: -7 })[0]).toBe('Malmö is 7° warmer than Akureyri');
   });
 });

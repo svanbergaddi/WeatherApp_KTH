@@ -4,16 +4,20 @@ import { FavouritesProvider } from '@/Favourites/FavouritesViewModel';
 import { ForecastProvider } from '@/Forecast/ForecastViewModel';
 import { SettingsProvider } from '@/Settings/SettingsViewModel';
 import { useAppTheme } from '@/Shared/Theme';
+import { ThemeProvider } from '@/Theme/ThemeViewModel';
 
-// The providers wrap everything, so every screen shares ONE copy of settings, forecast and favourites.
-// Settings is outermost because the forecast and the theme read from it.
+// The providers wrap everything, so every screen shares ONE copy of settings, forecast, theme and favourites.
+// The order matters: each provider can only read the ones OUTSIDE it.
+//   Settings → Forecast (reads the refresh rate) → Theme (reads the theme choice + the viewed city) → Favourites
 export default function RootLayout() {
   return (
     <SettingsProvider>
       <ForecastProvider>
-        <FavouritesProvider>
-          <ThemedStack />
-        </FavouritesProvider>
+        <ThemeProvider>
+          <FavouritesProvider>
+            <ThemedStack />
+          </FavouritesProvider>
+        </ThemeProvider>
       </ForecastProvider>
     </SettingsProvider>
   );

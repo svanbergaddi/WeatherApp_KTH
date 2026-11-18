@@ -1,4 +1,6 @@
-import { Calc_DaylightChange, Calc_GroupByDay, Calc_HoursFromNow, Calc_WhatToWear, Calc_WindWarning, Parse_Forecast } from '@/Forecast/ForecastHelpers';
+import {
+  Calc_DaylightChange, Calc_GroupByDay, Calc_HoursFromNow, Calc_SunProgress, Calc_WhatToWear, Calc_WindWarning, Parse_Forecast,
+} from '@/Forecast/ForecastHelpers';
 import { AppError, HourlyPoint } from '@/Shared/Types';
 import reykjavik from './fixtures/openmeteo-reykjavik.json';
 
@@ -252,5 +254,26 @@ describe('Calc_HoursFromNow', () => {
 
   test('just after midnight: the whole day is left', () => {
     expect(Calc_HoursFromNow(day, '2026-11-17T00:05')).toHaveLength(24);
+  });
+});
+
+describe('Calc_SunProgress', () => {
+  // Reykjavík, 17 Nov: sunrise 10:03, sunset 16:21 (378 minutes of sun).
+  const sunrise = '2026-11-17T10:03';
+  const sunset = '2026-11-17T16:21';
+
+  test('0 at sunrise, 0.5 halfway, 1 at sunset', () => {
+    expect(Calc_SunProgress('2026-11-17T10:03', sunrise, sunset)).toBe(0);
+    expect(Calc_SunProgress('2026-11-17T13:12', sunrise, sunset)).toBe(0.5);
+    expect(Calc_SunProgress('2026-11-17T16:21', sunrise, sunset)).toBe(1);
+  });
+
+  test('null before sunrise and after sunset (the sun is down)', () => {
+    expect(Calc_SunProgress('2026-11-17T08:00', sunrise, sunset)).toBeNull();
+    expect(Calc_SunProgress('2026-11-17T20:00', sunrise, sunset)).toBeNull();
+  });
+
+  test('polar night: sunrise and sunset are both midnight, so no arc', () => {
+    expect(Calc_SunProgress('2026-11-18T12:00', '2026-11-18T00:00', '2026-11-18T00:00')).toBeNull();
   });
 });

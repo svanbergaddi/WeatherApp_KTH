@@ -9,6 +9,7 @@ import { useSearchViewModel } from '@/Search/SearchViewModel';
 import { StatusBanner } from '@/Shared/Components/StatusBanner';
 import { Format_LastUpdated } from '@/Shared/FormatHelpers';
 import { useAppTheme } from '@/Shared/Theme';
+import { SceneBanner } from '@/Theme/Scenes/SceneBanner';
 
 // ---- Home screen (W-01) ----
 // The View in MVVM: it only places things on screen. All state and decisions are in the ViewModels.
@@ -39,9 +40,12 @@ export function SearchScreen() {
     >
       <SearchBox search={search} />
 
-      {/* Empty: first start, nothing picked yet. */}
+      {/* Empty: first start, nothing picked yet. The scene already shows, so the screen isn't bare. */}
       {status === 'empty' && (
-        <Text style={[styles.hint, { color: theme.textMuted }]}>Search for a place, or pick one of the cities above.</Text>
+        <>
+          <SceneBanner />
+          <Text style={[styles.hint, { color: theme.textMuted }]}>Search for a place, or pick one of the cities above.</Text>
+        </>
       )}
 
       {/* Loading for the first time: nothing to show yet. */}
@@ -68,7 +72,8 @@ export function SearchScreen() {
       {/* Checked again here (not with hasData) so TypeScript knows none of them is null inside. */}
       {place !== null && data !== null && view !== null && (
         <View style={isLandscape ? styles.columns : styles.stack}>
-          <View style={isLandscape ? styles.column : undefined}>
+          <View style={[styles.stack, isLandscape && styles.column]}>
+            <SceneBanner />
             <CurrentWeatherCard
               place={place}
               forecast={data}

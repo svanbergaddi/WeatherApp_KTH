@@ -1,5 +1,5 @@
 import {
-  Format_DayName, Format_DaylightChange, Format_DaylightLength, Format_ErrorMessage, Format_LastUpdated, Format_Outfit,
+  Format_DayName, Format_DaylightChange, Format_DaylightLength, Format_Duration, Format_ErrorMessage, Format_LastUpdated, Format_Outfit,
   Format_Temperature,
   Format_Time, Format_Weather, Format_WindWarning,
 } from '@/Shared/FormatHelpers';
@@ -127,5 +127,30 @@ describe('Format_DaylightLength', () => {
   test('polar night and midnight sun get their own words', () => {
     expect(Format_DaylightLength(0)).toBe('No sunrise today (polar night)');
     expect(Format_DaylightLength(86_400)).toBe('The sun never sets today (midnight sun)');
+  });
+});
+
+describe('Format_Duration', () => {
+  test('hours and minutes, short', () => {
+    expect(Format_Duration(22_737)).toBe('6 h 19 min');
+    expect(Format_Duration(0)).toBe('0 h 0 min');
+    expect(Format_Duration(86_400)).toBe('24 h 0 min');
+  });
+});
+
+describe('Format_ErrorMessage: which service failed', () => {
+  test('search errors name the place search, not the weather', () => {
+    expect(Format_ErrorMessage(new AppError('http', 'x', 401), 'search')).toBe('The place search had a problem (error 401).');
+    expect(Format_ErrorMessage(new AppError('timeout', 'x'), 'search')).toBe('The place search is slow right now. Please try again.');
+    expect(Format_ErrorMessage(new AppError('parse', 'x'), 'search')).toBe("Couldn't read the search results.");
+  });
+
+  test('without a service it is the weather (the forecast and Compare)', () => {
+    expect(Format_ErrorMessage(new AppError('http', 'x', 500))).toBe('The weather service had a problem (error 500).');
+  });
+
+  test('messages that are the same for both services', () => {
+    expect(Format_ErrorMessage(new AppError('network', 'x'), 'search')).toBe('No internet connection.');
+    expect(Format_ErrorMessage(new AppError('http', 'x', 429), 'search')).toBe('Too many requests. Wait a second and try again.');
   });
 });

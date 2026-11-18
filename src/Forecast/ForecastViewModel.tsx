@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Calc_DaylightChange, Calc_GroupByDay, Calc_HoursFromNow, Calc_WhatToWear, Calc_WindWarning, Parse_Forecast,
+  Calc_DaylightChange, Calc_GroupByDay, Calc_HoursFromNow, Calc_SunProgress, Calc_WhatToWear, Calc_WindWarning,
+  Parse_Forecast,
 } from '@/Forecast/ForecastHelpers';
 import { API_GetForecast, Storage_LoadForecast, Storage_SaveForecast } from '@/Forecast/ForecastService';
 import { useSettingsViewModel } from '@/Settings/SettingsViewModel';
@@ -16,6 +17,7 @@ export type ForecastView = {
   windWarningNow: WindWarning; // W-23
   outfitToday: Outfit; // W-24
   daylightChangeMinutes: number; // W-26
+  sunProgress: number | null; // W-30: 0 = sunrise … 1 = sunset, null = the sun is down
 };
 
 // Everything the day detail screen shows for ONE day (W-02), already calculated.
@@ -196,6 +198,8 @@ function Process_BuildView(forecast: Forecast): ForecastView {
     windWarningNow: Calc_WindWarning(forecast.current.windGustsMs),
     outfitToday: Calc_WhatToWear(today.feelsLikeMinC, today.precipitationMm, today.windGustsMaxMs),
     daylightChangeMinutes: Calc_DaylightChange(today.daylightSeconds, yesterday.daylightSeconds),
+    // Uses the forecast's "now", which updates with every refresh (W-04). Good enough for an arc.
+    sunProgress: Calc_SunProgress(forecast.current.time, today.sunrise, today.sunset),
   };
 }
 

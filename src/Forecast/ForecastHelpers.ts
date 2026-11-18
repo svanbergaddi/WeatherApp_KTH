@@ -119,6 +119,26 @@ export function Calc_HoursFromNow(hours: HourlyPoint[], nowLocalTime: string): H
   return hours.filter((hour) => hour.time >= currentHour);
 }
 
+// ---- Calc_SunProgress (W-30, the daylight arc) ----
+// How far the sun has come today: 0 = sunrise, 0.5 = highest, 1 = sunset.
+// null when the sun is down (before sunrise, after sunset), or in polar night / midnight sun,
+// where sunrise and sunset are the same (the API gives midnight for both): then there's no arc to walk.
+// All three times are the city's local clock text ("2026-11-18T10:03"), so we compare minutes of the day.
+export function Calc_SunProgress(nowLocal: string, sunriseLocal: string, sunsetLocal: string): number | null {
+  const now = minutesOfDay(nowLocal);
+  const sunrise = minutesOfDay(sunriseLocal);
+  const sunset = minutesOfDay(sunsetLocal);
+
+  if (sunset <= sunrise) return null;
+  if (now < sunrise || now > sunset) return null;
+  return (now - sunrise) / (sunset - sunrise);
+}
+
+// "2026-11-18T10:03" → 603 (10 × 60 + 3).
+function minutesOfDay(localDateTime: string): number {
+  return Number(localDateTime.slice(11, 13)) * 60 + Number(localDateTime.slice(14, 16));
+}
+
 // ---- Calc_WindWarning (W-23) ----
 // Gusts, not the average wind, decide the warning: a gust is what knocks you over or takes your umbrella.
 // Limits from the Beaufort scale:

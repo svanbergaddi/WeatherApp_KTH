@@ -7,6 +7,16 @@ Short stories and "why" answers worth telling at the oral exam. Add one line whe
 |---|---|---|
 | 2026-11-18 | `Calc_DaylightChange` | A 10-second loss rounded to `-0` in JavaScript, so the screen would show "−0 min". A test caught it. Fix: `minutes === 0 ? 0 : minutes`. |
 
+## Found while writing the test report
+| Date | Found | What we did |
+|---|---|---|
+| 2026-11-18 | A maps.co error (wrong key, 429) would say "The weather service had a problem", but it was the place search that failed. | `Format_ErrorMessage` takes which service failed; search passes `'search'`. 3 tests. |
+
+## Found by using the app on the iPhone
+| Date | Found | What we did |
+|---|---|---|
+| 2026-11-18 | On Compare the search was at the bottom, so the keyboard covered the suggestions. | Moved the search to the top. Picking a place now closes the keyboard (`Keyboard.dismiss()` in `SearchBox`). |
+
 ## Things we found by testing against the real API
 | Date | Found | What we did |
 |---|---|---|
@@ -15,6 +25,11 @@ Short stories and "why" answers worth telling at the oral exam. Add one line whe
 | 2026-11-18 | "Reykjavik" showed without ", Iceland". Our own quick-pick city came first with a bare name, and the merge removed maps.co's properly named result as a duplicate. | Quick-pick cities now store region + country, and are named with the same `Format_PlaceName` rule. One rule for every name in the list. |
 | 2026-11-18 | Pausing mid-word ("Birming") showed "No place found", even though the place exists. | "No place found" now only shows after Enter. |
 | 2026-11-18 | maps.co only matches whole words: "Reykjav" finds nothing, and "Stockh" finds a street in Germany. Suggestions after 2 letters (W-21) can't come from maps.co alone. | We mix them: our own cities that start with the typed letters show at once, and maps.co's results are added after the pause. |
+
+## A mutation test that found a weak TEST
+| Date | What happened |
+|---|---|
+| 2026-11-18 | Removing the polar-night rule from `Calc_ThemeMode` made NO test fail. In polar night the API gives sunrise = sunset = midnight, so at noon the normal rule already said "night". The rule only matters 00:00–00:30, where the normal rule says "less than 30 min after sunset → light". Added a test at 00:15 in Longyearbyen; now the mutation is caught. |
 
 ## Mutation tests (broke the code on purpose, a test failed)
 | Function | What we broke | Tests that failed |
@@ -42,6 +57,9 @@ Short stories and "why" answers worth telling at the oral exam. Add one line whe
 | `Parse_Settings` | trusted the saved refresh value without checking it | 2 |
 | `Calc_CompareCities` | let −0 through | 1 |
 | `Calc_CompareCities` | compared yesterday (`daily[0]`) instead of today | 2 |
+| `Calc_ThemeMode` | night right at sunset instead of 30 min after | 1 |
+| `Calc_ThemeMode` | removed the polar-night rule | 1 (after adding the 00:15 test) |
+| `Calc_Season` | no flip for the southern hemisphere | 1 |
 
 ## Good "why" answers
 - **Why `unknown` for API JSON?** TypeScript won't let us read a field until we've checked it, so bad data can't sneak past the parser.
@@ -66,6 +84,16 @@ Short stories and "why" answers worth telling at the oral exam. Add one line whe
 - **How does landscape work? (W-10)** `useWindowDimensions()` gives width and height. When width > height, the "now" card and the lists go side by side (`flexDirection: 'row'`).
 - **How does the day detail screen get its data? (W-02)** The date is in the address (`/day/2026-11-19`). The screen asks the shared forecast for that day with `Process_GetDay(date)`. No new API call, so it always matches the home screen. If the date isn't in the forecast (an old link), it shows a message and a Back button instead of crashing.
 - **Why can't the phone reach the laptop on eduroam?** eduroam isolates devices from each other. For demos, use `npx expo start --tunnel` (goes through the internet) or the Android emulator on the laptop.
+- **How is the Compare table built?** A list `ROWS`: each row has a label and a small function that gets the value text from a forecast. The screen loops over it once and calls the function for the left and the right city. Adding a row = one line.
+- **Why an About card?** Open-Meteo (CC BY 4.0) and OpenStreetMap, which maps.co uses (ODbL), both require that the app credits them.
+- **How does the automatic night theme work? (W-27)** `ThemeProvider` takes the phone's location (else the viewed city), fetches that place's sunrise/sunset from Open-Meteo, and checks every minute: night if now is before sunrise or 30+ min after sunset. Polar night is always night, midnight sun always light.
+- **Why Unix timestamps for the sun times?** They're real moments, like `Date.now()`. "Is it after sunset?" is then `now >= sunset`, the same anywhere on Earth, with no time zone maths.
+- **How is the season chosen? (W-28)** From the month: Dec–Feb winter, Mar–May spring, Jun–Aug summer, Sep–Nov autumn, flipped south of the equator (December in Sydney is summer).
+- **Why did no screen change when the theme logic was added?** Screens only call `useAppTheme()`. Before, it read the setting; now it reads the palette ThemeProvider picked. Same function, same screens.
+- **How are the scenes animated? (W-30)** The still picture (sky, hills, trees) is react-native-svg. Everything that moves (snow, leaves, aurora, waves) is wrapped in an `Animated.View` and only moved, turned, scaled or faded. Those can use the **native driver**: the phone's UI thread runs the animation, so it stays smooth even when JavaScript is busy loading the forecast.
+- **How does reduce motion work? (W-30)** `useReduceMotion` asks the phone once (`AccessibilityInfo.isReduceMotionEnabled`) and listens for changes. Every loop then stops and stands at a fixed spot (`stillAt`), so the scene is a nice still picture instead of an empty sky.
+- **Why not `Math.random()` for the snowflakes?** It gives new numbers on every redraw, so the whole scene would jump. `Calc_Spread(index)` gives every snowflake the same place every time.
+- **How does the daylight arc work?** `Calc_SunProgress` turns now/sunrise/sunset (minutes of the day) into 0…1. The sun sits on half an ellipse at angle 180° × (1 − progress): left at sunrise, top at noon, right at sunset.
 - **When is the country shown?** Only for places outside the phone's country. The phone's country comes from `reverseGeocodeAsync` (the phone's own map service, no maps.co call). If we don't know it (no permission), the country is always shown, because we can't tell what "abroad" is.
 - **Why the haversine formula and not plain Pythagoras on lat/lon?** The Earth is round. This far north one degree of longitude is only ~55 km (Stockholm) but one degree of latitude is ~111 km, so a flat distance would sort wrongly.
 - **What if the user says no to location?** `Device_GetLocation` returns null, and the list keeps maps.co's order. Location is a bonus, never required.

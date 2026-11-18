@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Place } from '@/Shared/Types';
 import { QUICK_PICK_CITIES } from '@/Search/QuickPickCities';
 import { useSearchViewModel } from '@/Search/SearchViewModel';
 import { useAppTheme } from '@/Shared/Theme';
@@ -18,6 +19,12 @@ export function SearchBox({ search, placeholder = 'Search for a place' }: Props)
   const [longitudeText, setLongitudeText] = useState('');
 
   const inputStyle = [styles.input, { backgroundColor: theme.card, borderColor: theme.border, color: theme.text }];
+
+  // A place was tapped: close the keyboard first, so the result isn't hidden behind it.
+  function pick(place: Place): void {
+    Keyboard.dismiss();
+    search.Process_SelectPlace(place);
+  }
 
   return (
     <View style={styles.container}>
@@ -44,7 +51,7 @@ export function SearchBox({ search, placeholder = 'Search for a place' }: Props)
           {search.suggestions.map((place, i) => (
             <Pressable
               key={`${place.latitude},${place.longitude}`}
-              onPress={() => search.Process_SelectPlace(place)}
+              onPress={() => pick(place)}
               style={[styles.suggestion, i > 0 && { borderTopWidth: 1, borderTopColor: theme.border }]}
               accessibilityRole="button"
             >
@@ -59,7 +66,7 @@ export function SearchBox({ search, placeholder = 'Search for a place' }: Props)
         {QUICK_PICK_CITIES.map((city) => (
           <Pressable
             key={city.name}
-            onPress={() => search.Process_SelectPlace(city)}
+            onPress={() => pick(city)}
             style={[styles.chip, { borderColor: theme.border, backgroundColor: theme.card }]}
             accessibilityRole="button"
           >
@@ -78,7 +85,7 @@ export function SearchBox({ search, placeholder = 'Search for a place' }: Props)
             value={latitudeText} onChangeText={setLatitudeText} keyboardType="numbers-and-punctuation" />
           <TextInput style={[inputStyle, styles.coordinateInput]} placeholder="Longitude" placeholderTextColor={theme.textMuted}
             value={longitudeText} onChangeText={setLongitudeText} keyboardType="numbers-and-punctuation" />
-          <Pressable onPress={() => search.Process_SearchCoordinates(latitudeText, longitudeText)}
+          <Pressable onPress={() => { Keyboard.dismiss(); search.Process_SearchCoordinates(latitudeText, longitudeText); }}
             style={[styles.goButton, { backgroundColor: theme.accent }]} accessibilityRole="button">
             <Text style={{ color: theme.card, fontWeight: '600' }}>Go</Text>
           </Pressable>

@@ -106,8 +106,13 @@ export function Format_DaylightChange(minutes: number): string {
 export function Format_DaylightLength(seconds: number): string {
   if (seconds <= 0) return 'No sunrise today (polar night)';
   if (seconds >= 86_400) return 'The sun never sets today (midnight sun)';
+  return `${Format_Duration(seconds)} of daylight`;
+}
+
+// ---- Format_Duration: 22737 seconds → "6 h 19 min" (short, for tables) ----
+export function Format_Duration(seconds: number): string {
   const totalMinutes = Math.round(seconds / 60);
-  return `${Math.floor(totalMinutes / 60)} h ${totalMinutes % 60} min of daylight`;
+  return `${Math.floor(totalMinutes / 60)} h ${totalMinutes % 60} min`;
 }
 
 // ---- Format_LastUpdated: ISO time → "Last updated 14:05" (W-09) ----
@@ -122,19 +127,23 @@ export function Format_LastUpdated(savedAtIso: string): string {
 // ---- Format_ErrorMessage (W-15) ----
 // Turns any error into one short sentence for the user.
 // Every AppError kind gets its own message, so the user knows if it's their connection, the server, or their input.
-export function Format_ErrorMessage(error: unknown): string {
+// `service` says WHICH server failed, so a search problem isn't blamed on the weather (and the other way round).
+const SERVICE_NAMES = { weather: 'weather service', search: 'place search' };
+const DATA_NAMES = { weather: 'the weather data', search: 'the search results' };
+
+export function Format_ErrorMessage(error: unknown, service: 'weather' | 'search' = 'weather'): string {
   if (!(error instanceof AppError)) return 'Something went wrong. Please try again.';
 
   switch (error.kind) {
     case 'network':
       return 'No internet connection.';
     case 'timeout':
-      return 'The weather service is slow right now. Please try again.';
+      return `The ${SERVICE_NAMES[service]} is slow right now. Please try again.`;
     case 'http':
       if (error.status === 429) return 'Too many requests. Wait a second and try again.';
-      return `The weather service had a problem (error ${error.status}).`;
+      return `The ${SERVICE_NAMES[service]} had a problem (error ${error.status}).`;
     case 'parse':
-      return "Couldn't read the weather data.";
+      return `Couldn't read ${DATA_NAMES[service]}.`;
     case 'notFound':
       return 'No place found with that name.';
     case 'invalidInput':

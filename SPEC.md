@@ -118,6 +118,19 @@ Write one before coding each part.
 | 2026-11-18 | Home shows the hours LEFT today (from the current hour), 7 days, and the "now" card. Landscape = two columns. | W-07, W-10. Past hours aren't useful. |
 | 2026-11-18 | Day detail reads the SHARED forecast (no new API call); a date not in the forecast shows a message + Back | Always matches the home screen. An old link never crashes. |
 | 2026-11-18 | Demos on eduroam: `npx expo start --tunnel` or the Android emulator | eduroam isolates devices, so the phone can't reach the laptop directly |
+| 2026-11-18 | Compare = a table (each label once, two value columns) + the differences as sentences ("Stockholm is 4° warmer than Reykjavík"); "about the same" under 1° / 2 m/s | Easier to read than "+4.2". Tiny differences aren't worth reading. |
+| 2026-11-18 | Settings has an About card crediting Open-Meteo (CC BY 4.0) and OpenStreetMap (ODbL) | Both licences require credit in the app |
+| 2026-11-18 | Sun times as Unix timestamps (`timeformat=unixtime`), compared with the phone's clock | "Is it 30 min after sunset?" becomes a number comparison, no time zone conversion |
+| 2026-11-18 | Polar night (0 s daylight) = night all day, midnight sun (24 h) = light all day, decided on `daylight_duration` | In polar night the API gives sunrise = sunset = midnight, which means nothing |
+| 2026-11-18 | Theme: phone location, else the viewed city, else light. Sun times fetched again when the place (rounded to ~10 km) or the day changes; the clock ticks every minute and when the app comes back | Switches on time without fetching all the time. A failed fetch keeps the old sun times and never shows an error. |
+| 2026-11-18 | Seasonal light palettes: winter ice blue, spring birch green, summer sea blue, autumn rust | W-28 |
+| 2026-11-18 | Scenes: static picture in react-native-svg + moving parts as `Animated.View`s with the native driver (move, turn, scale, fade only) | Smooth on the UI thread. Animating SVG properties would run on the JS thread and stutter. |
+| 2026-11-18 | Reduce motion checked once per scene (`useReduceMotion`) and passed down; every loop then stands still at a natural spot | W-30. One listener instead of one per snowflake. |
+| 2026-11-18 | Particle positions from `Calc_Spread(index)`, not `Math.random()` | The scene looks the same on every redraw instead of jumping |
+| 2026-11-18 | Daylight arc on the "now" card from `Calc_SunProgress` (the city's local times, 0 = sunrise … 1 = sunset, null = sun down / polar) | W-30. Same local-text trick as the rest of the forecast. |
+| 2026-11-18 | Settings has a Scene preview (all 5 scenes); only on that screen, never saved, doesn't change the theme | Otherwise only today's season can be shown at the exam |
+| 2026-11-18 | Error messages name the service that failed (`Format_ErrorMessage(error, 'search')`): "The place search had a problem" vs "The weather service…" | Found while writing the test report: a maps.co error was blamed on the weather service |
+| 2026-11-18 | Compare: search at the top (suggestions above the keyboard); picking a place closes the keyboard (both screens) | Found on the iPhone: at the bottom, the keyboard covered the suggestions |
 | 2026-11-18 | Tests use saved real responses (`__tests__/fixtures/`), never the network | Tests are fast and give the same result every time |
 
 ## 6. End-of-session ritual
@@ -147,6 +160,10 @@ _(add the rest as we go)_
 | `Calc_WhatToWear` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
 | `useForecastViewModel`, `Format_ErrorMessage`, temporary test buttons on the home screen | Claude | Support code, step 3 |
 | `useSearchViewModel`, quick-pick list, search controls on the test screen | Claude | Support code, step 3 |
+| docs/TEST_REPORT.md: test file map + 25 UX scenarios with expected results (results left empty for us) | Claude | We run the scenarios and fill in Result/Pass ourselves |
+| Scenes (W-30): 5 animated scenes, SceneBanner, FallingParticles, useLoop/useReduceMotion, DaylightArc, `Calc_SunProgress` + `Calc_Spread` + tests | Claude | UI + Core helpers with tests |
+| Theme section: ThemeHelpers (`Parse_SunTimes`, `Calc_ThemeMode`, `Calc_Season`) + tests, ThemeService, ThemeViewModel, seasonal palettes | Claude | Core + Support. 3 mutations checked; one showed a weak test, fixed. |
+| Step 4 part 3: designed Compare, Favourites, Settings screens; `Format_ComparisonSentences` + `Format_Duration` + tests | Claude | UI + Support |
 | Step 4 part 2: day detail (`Process_GetDay`/`Process_BuildDayView` + tests, `Format_DaylightLength` + tests, DaySummaryCard, HourlyList) | Claude | UI + Support |
 | Step 4 part 1: Theme.ts, Format_ helpers + tests, `Calc_HoursFromNow`, Card/StatusBanner/SearchBox, CurrentWeatherCard/HourlyStrip/DailyList, home screen, themed tabs | Claude | Boilerplate (UI) + Support. Format_ and Calc_ have tests. |
 | Compare (`Calc_CompareCities`, ViewModel, test screen) | Claude | Step 3. 2 mutations checked (caught). |
@@ -168,3 +185,4 @@ _(add the rest as we go)_
 | 2026-11-17 | Expo project, routes, placeholder screens, Jest | Data layer |
 | 2026-11-18 | Data layer + saved API responses, checked in Postman, `.env` key. All Core helpers (Forecast + Search) with 42 tests. docs/EXAM_NOTES.md. | Step 3: ViewModels, starting with `ForecastViewModel` |
 | 2026-11-18 | Step 3: ViewModels for Forecast, Search, Favourites, Settings, Compare (shared ones via Context). Search: own cities + maps.co, short names, closest first, English. expo-location. 88 tests. | Try everything on the phone. Then the Theme section or step 4 (UI). |
+| 2026-11-18 | Step 4: all screens designed (home, day detail, compare, favourites, settings), themed light/night, landscape, every state. 116 tests. | Theme section (W-27, W-28, W-30), then step 5 (test report) and step 6 (docs) |

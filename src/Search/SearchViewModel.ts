@@ -107,7 +107,7 @@ export function useSearchViewModel(onPlaceSelected: (place: Place) => void) {
       if (requestId !== requestIdRef.current) return [];
 
       // maps.co failed (offline, 429 …): keep our own matches so the user can still pick one.
-      setState((previous) => ({ ...previous, suggestions: localMatches, isSearching: false, message: Format_ErrorMessage(error) }));
+      setState((previous) => ({ ...previous, suggestions: localMatches, isSearching: false, message: Format_ErrorMessage(error, 'search') }));
       return localMatches;
     }
   }
