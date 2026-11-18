@@ -7,6 +7,12 @@ export type Place = {
   longitude: number;
 };
 
+// What the user typed in the coordinate fields, after Validate_Coordinates checked it (W-13).
+export type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
 export type CurrentWeather = {
   time: string; // local time, e.g. "2026-11-17T08:15"
   temperatureC: number;
@@ -49,6 +55,17 @@ export type Forecast = {
   current: CurrentWeather;
   hourly: HourlyPoint[]; // includes yesterday (past_days=1)
   daily: DailySummary[]; // daily[0] is yesterday, daily[1] is today
+};
+
+// How worried the user should be about the wind gusts (W-23). The screen turns it into text and colour.
+export type WindWarning = 'none' | 'strong' | 'storm';
+
+// What to wear (W-24). The screen turns it into one line, e.g. "Winter jacket + hat + gloves".
+export type Outfit = {
+  layer: 'tShirt' | 'lightJacket' | 'jacket' | 'winterJacket';
+  hat: boolean;
+  gloves: boolean;
+  rainGear: 'none' | 'umbrella' | 'rainJacket';
 };
 
 // Every expected failure in the app is one of these kinds.

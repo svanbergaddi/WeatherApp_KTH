@@ -82,6 +82,12 @@ Write one before coding each part.
 | 2026-11-18 | Every failure becomes one `AppError` with a `kind` | Screens only handle one error type and pick a message from the kind |
 | 2026-11-18 | Ask Open-Meteo for `past_days=1` | Gives yesterday's daylight, so we can show minutes gained/lost (W-26) |
 | 2026-11-18 | maps.co key in `.env` (`EXPO_PUBLIC_`), not in the code | Keeps it off GitHub. It still ends up inside the app, which is OK for a free lab key. |
+| 2026-11-18 | `null`, a missing field, or arrays of different lengths → the whole forecast is a parse error | Better to show an error than a wrong number. Simple to test. |
+| 2026-11-18 | Group hours by the first 10 characters of the time, not `new Date()` | Times are already the city's local time. `new Date()` would move them into the phone's time zone. |
+| 2026-11-18 | Wind warning uses gusts: strong ≥ 14 m/s, storm ≥ 21 m/s | Beaufort 7 and 9. Gusts are what knock you over, not the average wind. |
+| 2026-11-18 | What to wear uses feels-like (≥18 t-shirt, ≥10 light jacket, ≥0 jacket, else winter jacket; hat <5, gloves <0; rain ≥0.5 mm) | Feels-like already includes wind chill. Umbrella → rain jacket when gusts are strong, because umbrellas break. |
+| 2026-11-18 | Place name = first + last part of display_name ("Reykjavíkurborg, Ísland"); duplicates removed | Short, but the country tells apart same-name places |
+| 2026-11-18 | Coordinates: two separate fields, comma accepted as decimal point, checked with a pattern | Nordic users type "59,33". `Number('')` is 0, so `Number()` alone isn't enough. |
 | 2026-11-18 | Tests use saved real responses (`__tests__/fixtures/`), never the network | Tests are fast and give the same result every time |
 
 ## 6. End-of-session ritual
@@ -95,7 +101,7 @@ Write one before coding each part.
 | Q | Where in the code | Test |
 |---|---|---|
 | 1 API request | `API_GetForecast` (Forecast/ForecastService.ts) → `API_FetchJson` (Shared/HttpClient.ts) | |
-| 2 Parsing | `Parse_Forecast` (Forecast/ForecastHelpers.ts), not written yet | fixture: openmeteo-reykjavik.json |
+| 2 Parsing | `Parse_Forecast` (Forecast/ForecastHelpers.ts) | `__tests__/ForecastHelpers.test.ts` (12 tests) |
 | 5 Search → screen | | |
 | 12 Race condition | | |
 | 26 This file → code | | |
@@ -106,6 +112,13 @@ _(add the rest as we go)_
 |---|---|---|
 | Plan + first drafts of these files | Claude | We edited them |
 | Expo setup + data layer (Types, HttpClient, Storage, Services) | Claude | Support code. We checked it in Postman. |
+| `Calc_GroupByDay` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
+| `Calc_WindWarning` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
+| `Calc_WhatToWear` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
+| `Parse_Places`, `Validate_Coordinates` (Core) + their tests | Claude | We asked for them. 2 mutations checked (caught). |
+| `Calc_DaylightChange` (Core) + its tests | Claude | We asked for it. A test found a real bug (−0); fixed. 1 mutation checked (caught). |
+| `Parse_Forecast` tests | Claude | We asked for them. 2 mutations checked (both caught). |
+| `Parse_Forecast` (Core) | Claude | We asked for the full solution, to keep the style consistent. We must be able to explain every line. |
 
 ## 9. Session log
 | Date | What we did | Next |
