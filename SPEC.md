@@ -125,4 +125,4 @@ _(add the rest as we go)_
 |---|---|---|
 | 2026-11-16 | Plan + context files | Set up the Expo project |
 | 2026-11-17 | Expo project, routes, placeholder screens, Jest | Data layer |
-| 2026-11-18 | Data layer + saved API responses, checked in Postman, `.env` key | Write `Parse_Forecast` + its tests |
+| 2026-11-18 | Data layer + saved API responses, checked in Postman, `.env` key. All Core helpers (Forecast + Search) with 42 tests. docs/EXAM_NOTES.md. | Step 3: ViewModels, starting with `ForecastViewModel` |
