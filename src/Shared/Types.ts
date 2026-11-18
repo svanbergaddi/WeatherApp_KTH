@@ -13,6 +13,11 @@ export type Coordinates = {
   longitude: number;
 };
 
+// Where the phone is. countryCode is lowercase like maps.co's ("se"), or null if the phone couldn't tell.
+export type PhoneLocation = Coordinates & {
+  countryCode: string | null;
+};
+
 export type CurrentWeather = {
   time: string; // local time, e.g. "2026-11-17T08:15"
   temperatureC: number;

@@ -1,0 +1,366 @@
+[
+  {
+    "place_id": 185729485,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 254418058,
+    "lat": "59.2964776",
+    "lon": "18.0528626",
+    "class": "place",
+    "type": "suburb",
+    "place_rank": 19,
+    "importance": 0.14675068513008313,
+    "addresstype": "suburb",
+    "name": "Årsta",
+    "display_name": "Årsta, Enskede-Årsta-Vantörs stadsdelsområde, Stockholm, Stockholm Municipality, Stockholm County, 120 52, Sweden",
+    "address": {
+      "suburb": "Årsta",
+      "city_district": "Enskede-Årsta-Vantörs stadsdelsområde",
+      "city": "Stockholm",
+      "municipality": "Stockholm Municipality",
+      "county": "Stockholm County",
+      "ISO3166-2-lvl4": "SE-AB",
+      "postcode": "120 52",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": {
+      "wikidata": "Q1782644",
+      "wikipedia": "sv:Årsta",
+      "population": "20154",
+      "ref:SE:pts:postort": "ÅRSTA"
+    },
+    "namedetails": {
+      "name": "Årsta"
+    },
+    "boundingbox": [
+      "59.2764776",
+      "59.3164776",
+      "18.0328626",
+      "18.0728626"
+    ]
+  },
+  {
+    "place_id": 186150855,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 21992736,
+    "lat": "59.8679325",
+    "lon": "17.6888787",
+    "class": "place",
+    "type": "suburb",
+    "place_rank": 19,
+    "importance": 0.14673883344777594,
+    "addresstype": "suburb",
+    "name": "Årsta",
+    "display_name": "Årsta, Uppsala, Uppsala kommun, Uppsala County, 754 46, Sweden",
+    "address": {
+      "suburb": "Årsta",
+      "city": "Uppsala",
+      "municipality": "Uppsala kommun",
+      "county": "Uppsala County",
+      "ISO3166-2-lvl4": "SE-C",
+      "postcode": "754 46",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": {
+      "wikidata": "Q10726726",
+      "wikipedia": "sv:Årsta, Uppsala"
+    },
+    "namedetails": {
+      "name": "Årsta"
+    },
+    "boundingbox": [
+      "59.8479325",
+      "59.8879325",
+      "17.6688787",
+      "17.7088787"
+    ]
+  },
+  {
+    "place_id": 186438022,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 3655214068,
+    "lat": "62.8469129",
+    "lon": "17.7264035",
+    "class": "place",
+    "type": "hamlet",
+    "place_rank": 20,
+    "importance": 0.13338792019531545,
+    "addresstype": "hamlet",
+    "name": "Årsta",
+    "display_name": "Årsta, Högsjö District, Härnösands kommun, Västernorrland County, Sweden",
+    "address": {
+      "hamlet": "Årsta",
+      "city": "Högsjö District",
+      "municipality": "Härnösands kommun",
+      "county": "Västernorrland County",
+      "ISO3166-2-lvl4": "SE-Y",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": null,
+    "namedetails": {
+      "name": "Årsta"
+    },
+    "boundingbox": [
+      "62.8269129",
+      "62.8669129",
+      "17.7064035",
+      "17.7464035"
+    ]
+  },
+  {
+    "place_id": 186305733,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 7424762990,
+    "lat": "60.2705555",
+    "lon": "17.4754488",
+    "class": "place",
+    "type": "hamlet",
+    "place_rank": 20,
+    "importance": 0.13338722896162353,
+    "addresstype": "hamlet",
+    "name": "Årsta",
+    "display_name": "Årsta, Tierps kommun, Uppsala County, 815 91, Sweden",
+    "address": {
+      "hamlet": "Årsta",
+      "municipality": "Tierps kommun",
+      "county": "Uppsala County",
+      "ISO3166-2-lvl4": "SE-C",
+      "postcode": "815 91",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": null,
+    "namedetails": {
+      "name": "Årsta"
+    },
+    "boundingbox": [
+      "60.2505555",
+      "60.2905555",
+      "17.4554488",
+      "17.4954488"
+    ]
+  },
+  {
+    "place_id": 186153625,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 5232712161,
+    "lat": "59.9277806",
+    "lon": "17.8947329",
+    "class": "place",
+    "type": "isolated_dwelling",
+    "place_rank": 22,
+    "importance": 0.10672473105973905,
+    "addresstype": "isolated_dwelling",
+    "name": "Årsta",
+    "display_name": "Årsta, Uppsala kommun, Uppsala County, 741 48, Sweden",
+    "address": {
+      "isolated_dwelling": "Årsta",
+      "municipality": "Uppsala kommun",
+      "county": "Uppsala County",
+      "ISO3166-2-lvl4": "SE-C",
+      "postcode": "741 48",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": null,
+    "namedetails": {
+      "name": "Årsta"
+    },
+    "boundingbox": [
+      "59.9277306",
+      "59.9278306",
+      "17.8946829",
+      "17.8947829"
+    ]
+  },
+  {
+    "place_id": 185939900,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 7435641313,
+    "lat": "59.0143778",
+    "lon": "16.5259595",
+    "class": "place",
+    "type": "farm",
+    "place_rank": 22,
+    "importance": 0.10672126268406193,
+    "addresstype": "farm",
+    "name": "Årsta",
+    "display_name": "Årsta, Lilla Tjugesta, Katrineholms kommun, Södermanland County, Sweden",
+    "address": {
+      "farm": "Årsta",
+      "hamlet": "Lilla Tjugesta",
+      "municipality": "Katrineholms kommun",
+      "county": "Södermanland County",
+      "ISO3166-2-lvl4": "SE-D",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": null,
+    "namedetails": {
+      "name": "Årsta"
+    },
+    "boundingbox": [
+      "59.0043778",
+      "59.0243778",
+      "16.5159595",
+      "16.5359595"
+    ]
+  },
+  {
+    "place_id": 186144611,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 30439177,
+    "lat": "59.8641760",
+    "lon": "17.7026765",
+    "class": "railway",
+    "type": "halt",
+    "place_rank": 30,
+    "importance": 0.00007216678110928538,
+    "addresstype": "railway",
+    "name": "Årsta",
+    "display_name": "Årsta, Fålhagsleden, Slavsta by, Uppsala, Uppsala kommun, Uppsala County, 754 52, Sweden",
+    "address": {
+      "railway": "Årsta",
+      "road": "Fålhagsleden",
+      "hamlet": "Slavsta by",
+      "city": "Uppsala",
+      "municipality": "Uppsala kommun",
+      "county": "Uppsala County",
+      "ISO3166-2-lvl4": "SE-C",
+      "postcode": "754 52",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": {
+      "train": "yes",
+      "public_transport": "stop_position"
+    },
+    "namedetails": {
+      "ref": "Ås",
+      "name": "Årsta",
+      "name:sv": "Årsta"
+    },
+    "boundingbox": [
+      "59.8641260",
+      "59.8642260",
+      "17.7026265",
+      "17.7027265"
+    ]
+  },
+  {
+    "place_id": 186153787,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 12297497164,
+    "lat": "59.9281186",
+    "lon": "17.8946780",
+    "class": "highway",
+    "type": "bus_stop",
+    "place_rank": 30,
+    "importance": 0.00005806439307235855,
+    "addresstype": "highway",
+    "name": "Årsta",
+    "display_name": "Årsta, C 660, Uppsala kommun, Uppsala County, 741 48, Sweden",
+    "address": {
+      "highway": "Årsta",
+      "road": "C 660",
+      "municipality": "Uppsala kommun",
+      "county": "Uppsala County",
+      "ISO3166-2-lvl4": "SE-C",
+      "postcode": "741 48",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": {
+      "gtfs:stop_id:SE-UL": "9022003780985001",
+      "gtfs:platform_code:SE-UL": "A"
+    },
+    "namedetails": {
+      "name": "Årsta"
+    },
+    "boundingbox": [
+      "59.9280686",
+      "59.9281686",
+      "17.8946280",
+      "17.8947280"
+    ]
+  },
+  {
+    "place_id": 185932975,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 7443862291,
+    "lat": "59.3987925",
+    "lon": "16.5303917",
+    "class": "place",
+    "type": "hamlet",
+    "place_rank": 20,
+    "importance": 0.13339598764019225,
+    "addresstype": "hamlet",
+    "name": "Ärsta",
+    "display_name": "Ärsta, Eskilstuna, Eskilstuna kommun, Södermanland County, 633 53, Sweden",
+    "address": {
+      "hamlet": "Ärsta",
+      "city": "Eskilstuna",
+      "municipality": "Eskilstuna kommun",
+      "county": "Södermanland County",
+      "ISO3166-2-lvl4": "SE-D",
+      "postcode": "633 53",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": null,
+    "namedetails": {
+      "name": "Ärsta"
+    },
+    "boundingbox": [
+      "59.3787925",
+      "59.4187925",
+      "16.5103917",
+      "16.5503917"
+    ]
+  },
+  {
+    "place_id": 186458979,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 1142893749,
+    "lat": "63.0569501",
+    "lon": "17.6322382",
+    "class": "place",
+    "type": "hamlet",
+    "place_rank": 20,
+    "importance": 0.13338924773022048,
+    "addresstype": "hamlet",
+    "name": "Ärsta",
+    "display_name": "Ärsta, Dal District, Kramfors kommun, Västernorrland County, Sweden",
+    "address": {
+      "hamlet": "Ärsta",
+      "city": "Dal District",
+      "municipality": "Kramfors kommun",
+      "county": "Västernorrland County",
+      "ISO3166-2-lvl4": "SE-Y",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": null,
+    "namedetails": {
+      "name": "Ärsta"
+    },
+    "boundingbox": [
+      "63.0369501",
+      "63.0769501",
+      "17.6122382",
+      "17.6522382"
+    ]
+  }
+]

@@ -1,0 +1,193 @@
+[
+  {
+    "place_id": 185734158,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 5758700209,
+    "lat": "59.2785472",
+    "lon": "18.0110890",
+    "class": "railway",
+    "type": "station",
+    "place_rank": 30,
+    "importance": 0.3700481642699419,
+    "addresstype": "railway",
+    "name": "Älvsjö",
+    "display_name": "Älvsjö, Älvsjö Broväg, Liseberg, Älvsjö, Hägersten-Älvsjö stadsdelsområde, Stockholm, Stockholm Municipality, Stockholm County, 125 31, Sweden",
+    "address": {
+      "railway": "Älvsjö",
+      "road": "Älvsjö Broväg",
+      "suburb": "Liseberg",
+      "city_district": "Hägersten-Älvsjö stadsdelsområde",
+      "city": "Stockholm",
+      "municipality": "Stockholm Municipality",
+      "county": "Stockholm County",
+      "ISO3166-2-lvl4": "SE-AB",
+      "postcode": "125 31",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": {
+      "wikidata": "Q255031",
+      "wikipedia": "sv:Älvsjö station",
+      "sl_stop_id": "9529",
+      "wheelchair": "yes",
+      "railway:ref": "Äs",
+      "public_transport": "station"
+    },
+    "namedetails": {
+      "name": "Älvsjö"
+    },
+    "boundingbox": [
+      "59.2735472",
+      "59.2835472",
+      "18.0060890",
+      "18.0160890"
+    ]
+  },
+  {
+    "place_id": 185735084,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "relation",
+    "osm_id": 8844985,
+    "lat": "59.2758272",
+    "lon": "18.0017457",
+    "class": "boundary",
+    "type": "administrative",
+    "place_rank": 20,
+    "importance": 0.14675068513008313,
+    "addresstype": "suburb",
+    "name": "Älvsjö",
+    "display_name": "Älvsjö, Hägersten-Älvsjö stadsdelsområde, Stockholm Municipality, Stockholm County, Sweden",
+    "address": {
+      "suburb": "Älvsjö",
+      "city_district": "Hägersten-Älvsjö stadsdelsområde",
+      "municipality": "Stockholm Municipality",
+      "county": "Stockholm County",
+      "ISO3166-2-lvl4": "SE-AB",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": {
+      "wikidata": "Q255019",
+      "wikipedia": "sv:Älvsjö",
+      "population": "1530",
+      "linked_place": "suburb",
+      "wikimedia_commons": "Category:Älvsjö",
+      "ref:SE:pts:postort": "ÄLVSJÖ"
+    },
+    "namedetails": {
+      "name": "Älvsjö"
+    },
+    "boundingbox": [
+      "59.2624667",
+      "59.2921998",
+      "17.9552230",
+      "18.0459268"
+    ]
+  },
+  {
+    "place_id": 185585426,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 7474024497,
+    "lat": "59.9181104",
+    "lon": "18.7194235",
+    "class": "place",
+    "type": "isolated_dwelling",
+    "place_rank": 22,
+    "importance": 0.10672476005188065,
+    "addresstype": "isolated_dwelling",
+    "name": "Älvsjö",
+    "display_name": "Älvsjö, Älvdalen, Norrtälje kommun, Stockholm County, 761 74, Sweden",
+    "address": {
+      "isolated_dwelling": "Älvsjö",
+      "hamlet": "Älvdalen",
+      "municipality": "Norrtälje kommun",
+      "county": "Stockholm County",
+      "ISO3166-2-lvl4": "SE-AB",
+      "postcode": "761 74",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": null,
+    "namedetails": {
+      "name": "Älvsjö"
+    },
+    "boundingbox": [
+      "59.9180604",
+      "59.9181604",
+      "18.7193735",
+      "18.7194735"
+    ]
+  },
+  {
+    "place_id": 184909976,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 7455558629,
+    "lat": "57.3315771",
+    "lon": "15.4076645",
+    "class": "place",
+    "type": "isolated_dwelling",
+    "place_rank": 22,
+    "importance": 0.10672262989242387,
+    "addresstype": "isolated_dwelling",
+    "name": "Älvsjö",
+    "display_name": "Älvsjö, Bodaryd, Stenberga, Vetlanda kommun, Jönköping County, 574 96, Sweden",
+    "address": {
+      "isolated_dwelling": "Älvsjö",
+      "hamlet": "Bodaryd",
+      "village": "Stenberga",
+      "municipality": "Vetlanda kommun",
+      "county": "Jönköping County",
+      "ISO3166-2-lvl4": "SE-F",
+      "postcode": "574 96",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": null,
+    "namedetails": {
+      "name": "Älvsjö"
+    },
+    "boundingbox": [
+      "57.3315271",
+      "57.3316271",
+      "15.4076145",
+      "15.4077145"
+    ]
+  },
+  {
+    "place_id": 185938425,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "node",
+    "osm_id": 5427287563,
+    "lat": "59.1142237",
+    "lon": "16.6032815",
+    "class": "place",
+    "type": "isolated_dwelling",
+    "place_rank": 22,
+    "importance": 0.10672106431677728,
+    "addresstype": "isolated_dwelling",
+    "name": "Älvsjö",
+    "display_name": "Älvsjö, Flens kommun, Södermanland County, 642 33, Sweden",
+    "address": {
+      "isolated_dwelling": "Älvsjö",
+      "municipality": "Flens kommun",
+      "county": "Södermanland County",
+      "ISO3166-2-lvl4": "SE-D",
+      "postcode": "642 33",
+      "country": "Sweden",
+      "country_code": "se"
+    },
+    "extratags": null,
+    "namedetails": {
+      "name": "Älvsjö"
+    },
+    "boundingbox": [
+      "59.1141737",
+      "59.1142737",
+      "16.6032315",
+      "16.6033315"
+    ]
+  }
+]

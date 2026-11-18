@@ -7,7 +7,15 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "cm2023weather",
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Your location is used to show the closest places first when you search, and to switch to the night theme after sunset."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     },

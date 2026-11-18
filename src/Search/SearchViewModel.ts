@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { QUICK_PICK_CITIES } from '@/Search/QuickPickCities';
-import { Calc_LocalMatches, Calc_MergeSuggestions, Parse_Places, Validate_Coordinates } from '@/Search/SearchHelpers';
+import {
+  Calc_LocalMatches, Calc_MergeSuggestions, Calc_SortByDistance, Parse_Places, Validate_Coordinates,
+} from '@/Search/SearchHelpers';
 import { API_SearchPlaces } from '@/Search/SearchService';
 import { Format_ErrorMessage } from '@/Shared/FormatHelpers';
-import { AppError, Place } from '@/Shared/Types';
+import { Device_GetLocation } from '@/Shared/Location';
+import { AppError, Place, PhoneLocation } from '@/Shared/Types';
 
 const MIN_LETTERS = 2; // W-21: suggestions start after 2 letters
 const TYPING_PAUSE_MS = 400; // W-21: wait until the user stops typing
@@ -29,6 +32,32 @@ export function useSearchViewModel(onPlaceSelected: (place: Place) => void) {
   const requestIdRef = useRef(0);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRequestAtRef = useRef(0); // time of the last maps.co call, in ms
+  const phoneLocationRef = useRef<PhoneLocation | null>(null); // null = unknown (no permission yet, or said no)
+
+  // ---- Process_Start: ask where the phone is, once, when the screen opens ----
+  // A ref, not state: the screen doesn't show the location, it's only used to sort the next list.
+  useEffect(() => {
+    Device_GetLocation().then((location) => {
+      phoneLocationRef.current = location;
+    });
+    // When the screen closes, stop everything still running.
+    return () => Process_CancelPending();
+  }, []); // [] = run once, when the screen opens
+
+  // The phone's country ("se"), or null if unknown. Places there don't show the country in their name.
+  function Process_HomeCountry(): string | null {
+    return phoneLocationRef.current?.countryCode ?? null;
+  }
+
+  // Our own cities that start with the typed letters, named like maps.co results, closest first.
+  function Process_LocalMatches(text: string): Place[] {
+    return Process_Sort(Calc_LocalMatches(text, QUICK_PICK_CITIES, Process_HomeCountry()));
+  }
+
+  // Closest first if we know where the phone is, otherwise unchanged.
+  function Process_Sort(places: Place[]): Place[] {
+    return Calc_SortByDistance(places, phoneLocationRef.current);
+  }
 
   // ---- Process_TypeQuery: runs on every key press (W-21) ----
   function Process_TypeQuery(text: string): void {
@@ -40,7 +69,7 @@ export function useSearchViewModel(onPlaceSelected: (place: Place) => void) {
     }
 
     // Our own matching cities show at once ("Ha" → Hafnarfjörður). maps.co's results are added after the pause.
-    const localMatches = Calc_LocalMatches(text, QUICK_PICK_CITIES);
+    const localMatches = Process_LocalMatches(text);
     setState({ query: text, suggestions: localMatches, isSearching: false, message: null });
 
     // Wait for a typing pause. If the last call was very recent, wait a bit longer (rate limit).
@@ -60,12 +89,13 @@ export function useSearchViewModel(onPlaceSelected: (place: Place) => void) {
     const requestId = ++requestIdRef.current;
     lastRequestAtRef.current = Date.now();
 
-    const localMatches = Calc_LocalMatches(text, QUICK_PICK_CITIES);
+    const localMatches = Process_LocalMatches(text);
     setState((previous) => ({ ...previous, isSearching: true, message: null }));
 
     try {
       const json = await API_SearchPlaces(text.trim(), controller.signal);
-      const places = Calc_MergeSuggestions(localMatches, Parse_Places(json));
+      const remotePlaces = Parse_Places(json, Process_HomeCountry());
+      const places = Process_Sort(Calc_MergeSuggestions(localMatches, remotePlaces));
       if (requestId !== requestIdRef.current) return []; // the user typed more since then
 
       const showNotFound = isFinalSearch && places.length === 0;
@@ -116,9 +146,6 @@ export function useSearchViewModel(onPlaceSelected: (place: Place) => void) {
     controllerRef.current?.abort();
     requestIdRef.current++; // any answer still on its way is now old
   }
-
-  // When the screen closes, stop everything still running.
-  useEffect(() => () => Process_CancelPending(), []);
 
   return { ...state, Process_TypeQuery, Process_SubmitQuery, Process_SelectPlace, Process_SearchCoordinates };
 }

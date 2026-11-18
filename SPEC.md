@@ -93,15 +93,20 @@ Write one before coding each part.
 | 2026-11-18 | Group hours by the first 10 characters of the time, not `new Date()` | Times are already the city's local time. `new Date()` would move them into the phone's time zone. |
 | 2026-11-18 | Wind warning uses gusts: strong ≥ 14 m/s, storm ≥ 21 m/s | Beaufort 7 and 9. Gusts are what knock you over, not the average wind. |
 | 2026-11-18 | What to wear uses feels-like (≥18 t-shirt, ≥10 light jacket, ≥0 jacket, else winter jacket; hat <5, gloves <0; rain ≥0.5 mm) | Feels-like already includes wind chill. Umbrella → rain jacket when gusts are strong, because umbrellas break. |
-| 2026-11-18 | Place name = place + region + country ("Birmingham, Michigan, United States"); duplicates = closer than ~10 km, not same name | Changed after testing "Birmingham": with only the country, 4 of 5 US Birminghams were hidden as "duplicates" |
+| 2026-11-18 | Place name = as short as possible: place + town ("Östbergahöjden, Stockholm"), or place + region if the place is the town ("Paris, Texas"). Add suburb → region → country only when two results would look the same. Built from maps.co's `address` fields, never postcodes. Duplicates = closer than ~10 km. | Consistent and short. Earlier tries were too long or showed postcodes ("Älvsjö, 125 31, Sverige") or hid places (4 of 5 US Birminghams). |
 | 2026-11-18 | "No place found" only after Enter, not while typing | A half word ("Birming") finds nothing on maps.co, but the place exists |
 | 2026-11-18 | Coordinates: two separate fields, comma accepted as decimal point, checked with a pattern | Nordic users type "59,33". `Number('')` is 0, so `Number()` alone isn't enough. |
 | 2026-11-18 | Race guard = cancel the old request + a request number | Cancelling stops the download. The number ignores an answer that already arrived. |
 | 2026-11-18 | On error, show the cache only if it's for the same place, else an error state | Old data for the right city is fine (W-09). Data for the wrong city never is (W-20). |
 | 2026-11-18 | ViewModels are React hooks (`useForecastViewModel`) | The screen just calls the hook. State lives in one place. |
 | 2026-11-18 | Search waits 400 ms after typing, and at least 1 s between maps.co calls | W-21 typing pause + maps.co's limit of about 1 request/second (avoids 429) |
-| 2026-11-18 | Keep coordinate input, but small (behind "Use coordinates instead") | The PDF asks for it (home screen, "city name or coordinates", "only valid floating-point values"). City search stays the main feature. |
+| 2026-11-18 | Keep coordinate input, but hidden until you tap "Use coordinates instead" | The PDF asks for it (home screen, "city name or coordinates", "only valid floating-point values"). City search stays the main feature. |
 | 2026-11-18 | Suggestions = our own cities that start with the typed letters (instant, accents ignored) + maps.co results, same city within ~10 km shown once | maps.co only matches whole words. This way "Ha" finds Hafnarfjörður at once, and any other city still works. |
+| 2026-11-18 | With location permission, search results are sorted closest first (haversine distance). Without it, maps.co's order. | "Årsta" should give your Årsta first. Location is a bonus: saying no never breaks search. |
+| 2026-11-18 | Location is asked for when the search screen opens, using the last known position if it's under 10 min old, with low accuracy | Fast, and saves battery. Knowing the city is enough. |
+| 2026-11-18 | Place names in English (maps.co `accept-language=en`) | The app is in English. Before, it mixed "Sverige" with "United States". |
+| 2026-11-18 | Country shown only for places abroad (phone's country from `reverseGeocodeAsync`); always shown if we don't know the phone's country | "Årsta, Stockholm" needs no ", Sweden". "Birmingham, Iowa" is clearer with ", United States". |
+| 2026-11-18 | Quick-pick cities store region + country and are named with the same rule as maps.co results; buttons still show the short name | Our cities hid maps.co's "Reykjavik, Iceland" as a duplicate and only had a bare name |
 | 2026-11-18 | Tests use saved real responses (`__tests__/fixtures/`), never the network | Tests are fast and give the same result every time |
 
 ## 6. End-of-session ritual
@@ -131,6 +136,8 @@ _(add the rest as we go)_
 | `Calc_WhatToWear` (Core) + its tests | Claude | We asked for it. 1 mutation checked (caught). |
 | `useForecastViewModel`, `Format_ErrorMessage`, temporary test buttons on the home screen | Claude | Support code, step 3 |
 | `useSearchViewModel`, quick-pick list, search controls on the test screen | Claude | Support code, step 3 |
+| English place names, country only abroad, re-saved maps.co test responses in English | Claude | Our idea. 1 mutation checked (caught). |
+| expo-location, `Device_GetLocation`, `Calc_SortByDistance` + `Calc_DistanceKm` (Core) + their tests | Claude | Our idea: closest result first. 1 mutation checked (caught). |
 | `Calc_LocalMatches`, `Calc_MergeSuggestions` (Core) + their tests | Claude | We chose the design. 2 mutations checked (caught). |
 | `Format_ErrorMessage` tests | Claude | We asked for them. 1 mutation checked (caught). |
 | `Parse_Places`, `Validate_Coordinates` (Core) + their tests | Claude | We asked for them. 2 mutations checked (caught). |

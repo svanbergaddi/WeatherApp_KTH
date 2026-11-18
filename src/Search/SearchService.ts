@@ -7,7 +7,9 @@ const SEARCH_URL = 'https://geocode.maps.co/search';
 const API_KEY = process.env.EXPO_PUBLIC_GEOCODE_KEY ?? '';
 
 // Gets the raw list of places matching the text. Parse it with Parse_Places.
-export function API_SearchPlaces(query: string, signal?: AbortSignal): Promise<unknown> {
-  const url = `${SEARCH_URL}?q=${encodeURIComponent(query)}&api_key=${API_KEY}`;
+// `language` makes maps.co name places in that language ("Sweden", "Stockholm County")
+// instead of each country's own language ("Sverige", "Stockholms län").
+export function API_SearchPlaces(query: string, signal?: AbortSignal, language: string = 'en'): Promise<unknown> {
+  const url = `${SEARCH_URL}?q=${encodeURIComponent(query)}&accept-language=${language}&api_key=${API_KEY}`;
   return API_FetchJson(url, signal);
 }

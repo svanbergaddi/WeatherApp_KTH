@@ -13,6 +13,7 @@ export function SearchScreen() {
   const search = useSearchViewModel(forecast.Process_LoadForecast);
   const [latitudeText, setLatitudeText] = useState('');
   const [longitudeText, setLongitudeText] = useState('');
+  const [showCoordinates, setShowCoordinates] = useState(false);
   const { view } = forecast;
 
   return (
@@ -40,12 +41,19 @@ export function SearchScreen() {
         ))}
       </View>
 
-      <Text style={styles.heading}>Coordinates</Text>
-      <View style={styles.row}>
-        <TextInput style={styles.input} placeholder="Latitude" value={latitudeText} onChangeText={setLatitudeText} />
-        <TextInput style={styles.input} placeholder="Longitude" value={longitudeText} onChangeText={setLongitudeText} />
-      </View>
-      <Button title="Go" onPress={() => search.Process_SearchCoordinates(latitudeText, longitudeText)} />
+      {/* Coordinates are hidden until asked for: city search is the main way in (W-13 still works). */}
+      <Text style={styles.link} onPress={() => setShowCoordinates(!showCoordinates)}>
+        {showCoordinates ? 'Hide coordinates' : 'Use coordinates instead'}
+      </Text>
+      {showCoordinates && (
+        <>
+          <View style={styles.row}>
+            <TextInput style={styles.input} placeholder="Latitude" value={latitudeText} onChangeText={setLatitudeText} />
+            <TextInput style={styles.input} placeholder="Longitude" value={longitudeText} onChangeText={setLongitudeText} />
+          </View>
+          <Button title="Go" onPress={() => search.Process_SearchCoordinates(latitudeText, longitudeText)} />
+        </>
+      )}
 
       <Text style={styles.heading}>Forecast</Text>
       <Button title="Refresh" onPress={forecast.Process_Refresh} />
@@ -72,5 +80,6 @@ const styles = StyleSheet.create({
   container: { padding: 16, gap: 8 },
   heading: { fontSize: 18, fontWeight: '600', marginTop: 12 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  link: { color: '#2a6fdb', marginTop: 12 },
   input: { borderWidth: 1, borderColor: '#999', borderRadius: 6, padding: 8, minWidth: 140 },
 });
