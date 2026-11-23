@@ -169,7 +169,7 @@ I forgot about these half way through but felt like this was a great summary of 
 | 2026-11-18 | Settings has a Scene preview (all 5 scenes); only on that screen, never saved, doesn't change the theme | Otherwise only today's season can be shown at the exam |
 | 2026-11-18 | Error messages name the service that failed (`Format_ErrorMessage(error, 'search')`): "The place search had a problem" vs "The weather service…" | Found while writing the test report: a maps.co error was blamed on the weather service |
 | 2026-11-18 | Compare: search at the top (suggestions above the keyboard); picking a place closes the keyboard (both screens) | Found on the iPhone: at the bottom, the keyboard covered the suggestions |
-| 2026-11-23 | Claude set up a template draft for docs/LLM_PROCESS.md from our sessions | My decision. I worked from the template and filled in the sections myself. REFLECTION.md is written by me alone. |
+| 2026-11-23 | Claude set up a template draft for docs/LLM_PROCESS.md from our sessions | My decision. I worked from the template and filled in the sections myself. |
 | 2026-11-18 | Tests use saved real responses (`__tests__/fixtures/`), never the network | Tests are fast and give the same result every time |
 
 ## 6. End-of-session ritual
