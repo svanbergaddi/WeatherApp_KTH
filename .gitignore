@@ -36,3 +36,4 @@ Thumbs.db
 .metro-health-check*
 npm-debug.*
 *.tsbuildinfo
+docs/EXAM_NOTES.md
